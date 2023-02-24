@@ -1,0 +1,2595 @@
+for make_study_keep = 1
+    
+    var_used         = squeeze(mean(mean(fc_subfieldr(:,1:6,:),3),2));
+    studykeep        = keepallrest2.*(1-badmaps).*(mean(var_used,2)~=0).*~isnan(mean(var_used,2)).*(qch>=5);
+    % sample size
+    size(find(studykeep==1))
+    % sample size T0
+    size(intersect(find(studykeep==1),find(tpnum==0)))
+    size(mintersect(find(studykeep==1),find(tpnum==0),find(strcmp(group4,'Group3'))))
+    % sample size T1
+    size(intersect(find(studykeep==1),find(tpnum==1)))
+    size(mintersect(find(studykeep==1),find(tpnum==1),find(strcmp(group4,'Group3'))))
+    % sample size T2
+    size(intersect(find(studykeep==1),find(tpnum==2)))
+    % sample size T3
+    size(intersect(find(studykeep==1),find(tpnum==3)))
+
+end
+
+%%% For plastic
+for plastic = 1
+    var_used = Dn(:,3:8);
+    keeptest = studykeep;
+
+    KZ = var_used;
+    minit = zeros(size(id));
+    tp_t0_there = minit;
+    tp_t1_there = minit;
+    tp_t2_there = minit;
+    tp_t3_there = minit;
+    daysfrombl  = minit;
+    daysfromt1  = minit;
+    daysfromt2  = minit;
+    ZChange_bl  = zeros(size(KZ))-666;
+    ZChange_t1  = zeros(size(KZ))-666;
+    ZChange_t2  = zeros(size(KZ))-666;
+
+    for i = 1:length(id)
+        if keeptest(i,:) == 1
+            i
+            inter0 		  = intersect(find(tpnum==0),find(idnum==idnum(i)));
+            inter1        = intersect(find(tpnum==1),find(idnum==idnum(i)));
+            inter2        = intersect(find(tpnum==2),find(idnum==idnum(i)));
+            inter3        = intersect(find(tpnum==3),find(idnum==idnum(i)));
+
+            tp_t0_there(i,1)    = ~isempty(inter0) .* keeptest(i)==1;
+            if ~isempty(inter0)
+                tp_t0_there(i,1) =  tp_t0_there(i,1) .* keeptest(inter0);
+            end
+            tp_t1_there(i,1)    = ~isempty(inter1) .* keeptest(i)==1;
+            if ~isempty(inter1)
+                tp_t1_there(i,1) =  tp_t1_there(i,1) .* keeptest(inter1);
+            end
+            tp_t2_there(i,1)    = ~isempty(inter2) .* keeptest(i)==1;
+            if ~isempty(inter2)
+                tp_t2_there(i,1) =  tp_t2_there(i,1) .* keeptest(inter2);
+            end
+            tp_t3_there(i,1)    = ~isempty(inter3) .* keeptest(i)==1;
+            if ~isempty(inter3)
+                tp_t3_there(i,1) =  tp_t3_there(i,1) .* keeptest(inter3);
+            end
+            if keeptest(inter0)~=0
+                daysfrombl(i,1)    = days(i)-days(inter0);
+                ZChange_bl(i,:)    = (KZ(i,:) - KZ(inter0,:));
+            end
+            if keeptest(inter1)~=0
+                daysfromt1(i,1)    = days(i)-days(inter1);
+                ZChange_t1(i,:)    = (KZ(i,:) - KZ(inter1,:));
+            end
+            if keeptest(inter2)~=0
+                daysfromt2(i,1)    = days(i)-days(inter2);
+                ZChange_t2(i,:)    = (KZ(i,:) - KZ(inter2,:));
+            end
+        else
+        end
+    end
+
+    ZChange_last = zeros(size(ZChange_bl));
+    ZChange_last(strcmp(group4,'Group_1') & strcmp(tp,'T1'),:) = ZChange_bl(strcmp(group4,'Group_1') & strcmp(tp,'T1'),:);
+    ZChange_last(strcmp(group4,'Group_1') & strcmp(tp,'T2'),:) = ZChange_t1(strcmp(group4,'Group_1') & strcmp(tp,'T2'),:);
+    ZChange_last(strcmp(group4,'Group_1') & strcmp(tp,'T3'),:) = ZChange_t2(strcmp(group4,'Group_1') & strcmp(tp,'T3'),:);
+
+    ZChange_last(strcmp(group4,'Group_2') & strcmp(tp,'T1'),:) = ZChange_bl(strcmp(group4,'Group_2') & strcmp(tp,'T1'),:);
+    ZChange_last(strcmp(group4,'Group_2') & strcmp(tp,'T2'),:) = ZChange_t1(strcmp(group4,'Group_2') & strcmp(tp,'T2'),:);
+    ZChange_last(strcmp(group4,'Group_2') & strcmp(tp,'T3'),:) = ZChange_t2(strcmp(group4,'Group_2') & strcmp(tp,'T3'),:);
+
+    ZChange_last(strcmp(group4,'Group3') & strcmp(tp,'T1'),:)  = ZChange_bl(strcmp(group4,'Group3')  & strcmp(tp,'T1'),:);
+    ZChange_last(strcmp(group4,'Group3') & strcmp(tp,'T2'),:)  = ZChange_t1(strcmp(group4,'Group3') & strcmp(tp,'T2'),:);
+    ZChange_last(strcmp(group4,'Group3') & strcmp(tp,'T3'),:)  = ZChange_t2(strcmp(group4,'Group3') & strcmp(tp,'T3'),:);
+
+    ZChange_last(strcmp(group4,'Control') & strcmp(tp,'T1'),:) = ZChange_bl(strcmp(group4,'Control') & strcmp(tp,'T1'),:);
+    ZChange_last(strcmp(group4,'Control') & strcmp(tp,'T2'),:) = ZChange_t1(strcmp(group4,'Control') & strcmp(tp,'T2'),:);
+    ZChange_last(strcmp(group4,'Control') & strcmp(tp,'T3'),:) = ZChange_t2(strcmp(group4,'Control') & strcmp(tp,'T3'),:);
+
+    subfield_Change = ZChange_last;
+    subfield_Change_bl = ZChange_bl;
+end
+
+for bh_change = 1
+    var_used = [car_varc(:,1:3)];
+    keep  = find(~isnan(mean(var_used,2)'))';
+    keeptest = zeros(length(id),1)
+    keeptest(keep) = 1;
+
+    KZ = var_used;
+    minit = zeros(size(id));
+    tp_t0_there = minit;
+    tp_t1_there = minit;
+    tp_t2_there = minit;
+    tp_t3_there = minit;
+    daysfrombl  = minit;
+    daysfromt1  = minit;
+    daysfromt2  = minit;
+    carChange_bl  = zeros(size(KZ))-666;
+    carChange_t1  = zeros(size(KZ))-666;
+    carChange_t2  = zeros(size(KZ))-666;
+
+    for i = 1:length(id)
+        if keeptest(i,:) == 1
+            i
+            inter0 		  = intersect(find(tpnum==0),find(idnum==idnum(i)));
+            inter1        = intersect(find(tpnum==1),find(idnum==idnum(i)));
+            inter2        = intersect(find(tpnum==2),find(idnum==idnum(i)));
+            inter3        = intersect(find(tpnum==3),find(idnum==idnum(i)));
+
+            tp_t0_there(i,1)    = ~isempty(inter0) .* keeptest(i)==1;
+            if ~isempty(inter0)
+                tp_t0_there(i,1) =  tp_t0_there(i,1) .* keeptest(inter0);
+            end
+            tp_t1_there(i,1)    = ~isempty(inter1) .* keeptest(i)==1;
+            if ~isempty(inter1)
+                tp_t1_there(i,1) =  tp_t1_there(i,1) .* keeptest(inter1);
+            end
+            tp_t2_there(i,1)    = ~isempty(inter2) .* keeptest(i)==1;
+            if ~isempty(inter2)
+                tp_t2_there(i,1) =  tp_t2_there(i,1) .* keeptest(inter2);
+            end
+            tp_t3_there(i,1)    = ~isempty(inter3) .* keeptest(i)==1;
+            if ~isempty(inter3)
+                tp_t3_there(i,1) =  tp_t3_there(i,1) .* keeptest(inter3);
+            end
+            if keeptest(inter0)~=0
+                daysfrombl(i,1)    = days(i)-days(inter0);
+                carChange_bl(i,:)    = (KZ(i,:) - KZ(inter0,:));
+            end
+            if keeptest(inter1)~=0
+                daysfromt1(i,1)    = days(i)-days(inter1);
+                carChange_t1(i,:)    = (KZ(i,:) - KZ(inter1,:));
+            end
+            if keeptest(inter2)~=0
+                daysfromt2(i,1)    = days(i)-days(inter2);
+                carChange_t2(i,:)    = (KZ(i,:) - KZ(inter2,:));
+            end
+        else
+        end
+    end
+
+    carChange_last = zeros(size(carChange_bl));
+    carChange_last(strcmp(group4,'Group_1') & strcmp(tp,'T1'),:) = carChange_bl(strcmp(group4,'Group_1') & strcmp(tp,'T1'),:);
+    carChange_last(strcmp(group4,'Group_1') & strcmp(tp,'T2'),:) = carChange_t1(strcmp(group4,'Group_1') & strcmp(tp,'T2'),:);
+    carChange_last(strcmp(group4,'Group_1') & strcmp(tp,'T3'),:) = carChange_t2(strcmp(group4,'Group_1') & strcmp(tp,'T3'),:);
+
+    carChange_last(strcmp(group4,'Group_2') & strcmp(tp,'T1'),:) = carChange_bl(strcmp(group4,'Group_2') & strcmp(tp,'T1'),:);
+    carChange_last(strcmp(group4,'Group_2') & strcmp(tp,'T2'),:) = carChange_t1(strcmp(group4,'Group_2') & strcmp(tp,'T2'),:);
+    carChange_last(strcmp(group4,'Group_2') & strcmp(tp,'T3'),:) = carChange_t2(strcmp(group4,'Group_2') & strcmp(tp,'T3'),:);
+
+    carChange_last(strcmp(group4,'Group3') & strcmp(tp,'T1'),:)  = carChange_bl(strcmp(group4,'Group3')  & strcmp(tp,'T1'),:);
+    carChange_last(strcmp(group4,'Group3') & strcmp(tp,'T2'),:)  = carChange_t1(strcmp(group4,'Group3') & strcmp(tp,'T2'),:);
+    carChange_last(strcmp(group4,'Group3') & strcmp(tp,'T3'),:)  = carChange_t2(strcmp(group4,'Group3') & strcmp(tp,'T3'),:);
+
+    carChange_last(strcmp(group4,'Control') & strcmp(tp,'T1'),:) = carChange_bl(strcmp(group4,'Control') & strcmp(tp,'T1'),:);
+    carChange_last(strcmp(group4,'Control') & strcmp(tp,'T2'),:) = carChange_t1(strcmp(group4,'Control') & strcmp(tp,'T2'),:);
+    carChange_last(strcmp(group4,'Control') & strcmp(tp,'T3'),:) = carChange_t2(strcmp(group4,'Control') & strcmp(tp,'T3'),:);
+
+end
+
+%hair change
+for bh_change = 1
+    var_used = [hair_c(:,1:3)];
+    keep  = find(~isnan(mean(var_used,2)'))';
+    keeptest = zeros(length(id),1)
+    keeptest(keep) = 1;
+
+    KZ = var_used;
+    minit = zeros(size(id));
+    tp_t0_there = minit;
+    tp_t1_there = minit;
+    tp_t2_there = minit;
+    tp_t3_there = minit;
+    daysfrombl  = minit;
+    daysfromt1  = minit;
+    daysfromt2  = minit;
+    carChange_bl  = zeros(size(KZ))-666;
+    carChange_t1  = zeros(size(KZ))-666;
+    carChange_t2  = zeros(size(KZ))-666;
+
+    for i = 1:length(id)
+        if keeptest(i,:) == 1
+            i
+            inter0 		  = intersect(find(tpnum==0),find(idnum==idnum(i)));
+            inter1        = intersect(find(tpnum==1),find(idnum==idnum(i)));
+            inter2        = intersect(find(tpnum==2),find(idnum==idnum(i)));
+            inter3        = intersect(find(tpnum==3),find(idnum==idnum(i)));
+
+            tp_t0_there(i,1)    = ~isempty(inter0) .* keeptest(i)==1;
+            if ~isempty(inter0)
+                tp_t0_there(i,1) =  tp_t0_there(i,1) .* keeptest(inter0);
+            end
+            tp_t1_there(i,1)    = ~isempty(inter1) .* keeptest(i)==1;
+            if ~isempty(inter1)
+                tp_t1_there(i,1) =  tp_t1_there(i,1) .* keeptest(inter1);
+            end
+            tp_t2_there(i,1)    = ~isempty(inter2) .* keeptest(i)==1;
+            if ~isempty(inter2)
+                tp_t2_there(i,1) =  tp_t2_there(i,1) .* keeptest(inter2);
+            end
+            tp_t3_there(i,1)    = ~isempty(inter3) .* keeptest(i)==1;
+            if ~isempty(inter3)
+                tp_t3_there(i,1) =  tp_t3_there(i,1) .* keeptest(inter3);
+            end
+            if keeptest(inter0)~=0
+                daysfrombl(i,1)    = days(i)-days(inter0);
+                carChange_bl(i,:)    = (KZ(i,:) - KZ(inter0,:));
+            end
+            if keeptest(inter1)~=0
+                daysfromt1(i,1)    = days(i)-days(inter1);
+                carChange_t1(i,:)    = (KZ(i,:) - KZ(inter1,:));
+            end
+            if keeptest(inter2)~=0
+                daysfromt2(i,1)    = days(i)-days(inter2);
+                carChange_t2(i,:)    = (KZ(i,:) - KZ(inter2,:));
+            end
+        else
+        end
+    end
+
+    hairChange_last = zeros(size(carChange_bl));
+    hairChange_last(strcmp(group4,'Group_1') & strcmp(tp,'T1'),:) = carChange_bl(strcmp(group4,'Group_1') & strcmp(tp,'T1'),:);
+    hairChange_last(strcmp(group4,'Group_1') & strcmp(tp,'T2'),:) = carChange_t1(strcmp(group4,'Group_1') & strcmp(tp,'T2'),:);
+    hairChange_last(strcmp(group4,'Group_1') & strcmp(tp,'T3'),:) = carChange_t2(strcmp(group4,'Group_1') & strcmp(tp,'T3'),:);
+
+    hairChange_last(strcmp(group4,'Group_2') & strcmp(tp,'T1'),:) = carChange_bl(strcmp(group4,'Group_2') & strcmp(tp,'T1'),:);
+    hairChange_last(strcmp(group4,'Group_2') & strcmp(tp,'T2'),:) = carChange_t1(strcmp(group4,'Group_2') & strcmp(tp,'T2'),:);
+    hairChange_last(strcmp(group4,'Group_2') & strcmp(tp,'T3'),:) = carChange_t2(strcmp(group4,'Group_2') & strcmp(tp,'T3'),:);
+
+    hairChange_last(strcmp(group4,'Group3') & strcmp(tp,'T1'),:)  = carChange_bl(strcmp(group4,'Group3')  & strcmp(tp,'T1'),:);
+    hairChange_last(strcmp(group4,'Group3') & strcmp(tp,'T2'),:)  = carChange_t1(strcmp(group4,'Group3') & strcmp(tp,'T2'),:);
+    hairChange_last(strcmp(group4,'Group3') & strcmp(tp,'T3'),:)  = carChange_t2(strcmp(group4,'Group3') & strcmp(tp,'T3'),:);
+
+    hairChange_last(strcmp(group4,'Control') & strcmp(tp,'T1'),:) = carChange_bl(strcmp(group4,'Control') & strcmp(tp,'T1'),:);
+    hairChange_last(strcmp(group4,'Control') & strcmp(tp,'T2'),:) = carChange_t1(strcmp(group4,'Control') & strcmp(tp,'T2'),:);
+    hairChange_last(strcmp(group4,'Control') & strcmp(tp,'T3'),:) = carChange_t2(strcmp(group4,'Control') & strcmp(tp,'T3'),:);
+
+
+end
+
+
+%% Structure ***************************************************************
+
+% T0-T1
+for Figure1 = 1
+    % keep the endpoints
+    Xn      = (subfield_Change);
+    keep1   = union(find(strcmp(groupN,'Perspective')),find(strcmp(groupN,'Affect')));
+    keep1   = union(keep1,    find(strcmp(groupN,'Presence')));
+    keep1   = union(keep1,    find(strcmp(groupN,'Control1')));
+
+    % keep no data
+    keep2   = mintersect(find(Xn(:,1) >-666), find(sum(Xn,2)~=0),find(abs(Xn)<1000));
+
+    keep4   = (find(tpnum == 1))
+    keep    = mintersect(keep1, keep2, keep4); %,
+    size(mintersect(keep, find(strcmp(groupN,'Affect')))) % 
+    size(mintersect(keep, find(strcmp(groupN,'Presence')))) % 
+    size(mintersect(keep, find(strcmp(groupN,'Control1')))) % 
+
+    Dk      = Xn(keep,:);
+    ik      = id(keep);
+    ink     = idnum(keep);
+    tk      = tpnum(keep);
+    tnk     = tp(keep);
+    gk      = group(keep);
+    g4k     = group4(keep);
+    gNk     = groupN(keep);
+    ak      = age(keep);
+    sk      = sex(keep);
+    A       = term(ak);
+    S       = term(sk);
+    G       = term(gk);
+    G4      = term(g4k);
+    GN      = term(gNk);
+    Sub     = term(ik);
+    T       = term(tnk);
+    Tn      = term(tk);
+
+
+    M     = 1  + A + S + GN  + random(Sub)  +   I;
+
+    %describtive statistics
+    keep_presence = (find(strcmp(groupN(keep),'Presence')))
+    keep_affect = (find(strcmp(groupN(keep),'Affect')))
+    keep_control   = (find(strcmp(groupN(keep),'Control1')))
+
+    for i = 1:6
+        meansdata(1,i) = mean(Dk(keep_presence,i))
+        stddata(1,i) = std(Dk(keep_presence,i))
+        SEM = std(Dk(keep_presence,i))/sqrt(length(Dk(keep_presence,i))); % Standard Error
+        ts = tinv([0.025  0.975],length(Dk(keep_presence,i))-1);      % T-Score
+        cidata = mean(Dk(keep_presence,i)) + ts*SEM;
+        cidatamin(1,i) = cidata(1);
+        cidatamax(1,i) = cidata(2);
+    end
+
+    for i = 1:6
+        meansdata(2,i) = mean(Dk(keep_affect,i))
+        stddata(2,i) = std(Dk(keep_affect,i))
+        SEM = std(Dk(keep_affect,i))/sqrt(length(Dk(keep_affect,i))); % Standard Error
+        ts = tinv([0.025  0.975],length(Dk(keep_affect,i))-1);      % T-Score
+        cidata = mean(Dk(keep_affect,i)) + ts*SEM;
+        cidatamin(2,i) = cidata(1);
+        cidatamax(2,i) = cidata(2);
+    end
+
+    for i = 1:6
+        meansdata(3,i) = mean(Dk(keep_control,i))
+        stddata(3,i) = std(Dk(keep_control,i))
+        SEM = std(Dk(keep_control,i))/sqrt(length(Dk(keep_control,i))); % Standard Error
+        ts = tinv([0.025  0.975],length(Dk(keep_control,i))-1);      % T-Score
+        cidata = mean(Dk(keep_control,i)) + ts*SEM;
+        cidatamin(3,i) = cidata(1);
+        cidatamax(3,i) = cidata(2);
+    end
+
+    slm     = SurfStatLinMod(Dk,M);
+    slm  	= SurfStatT(slm,GN.Control1);
+    T0T1_str_c_p   = 2*(1 - tcdf(abs(slm.t), slm.df));
+    T0T1_str_c_t   = slm.t;
+
+    slm     = SurfStatLinMod(Dk,M);
+    slm  	= SurfStatT(slm,GN.Presence)
+    T0T1_str_pr_p   = 2*(1 - tcdf(abs(slm.t), slm.df));
+    T0T1_str_pr_t   = slm.t;
+
+    slm     = SurfStatLinMod(Dk,M);
+    slm  	= SurfStatT(slm,GN.Affect)
+    T0T1_str_a_p   = 2*(1 - tcdf(abs(slm.t), slm.df));
+    T0T1_str_a_t   = slm.t;
+
+    descT0T1str = [T0T1_str_pr_t;T0T1_str_pr_p;meansdata(1,:);stddata(1,:);cidatamin(1,:);cidatamax(1,:);...      
+       [0,0,0,0,0,0]; T0T1_str_a_t; T0T1_str_a_p; meansdata(2,:);stddata(2,:);cidatamin(2,:);cidatamax(2,:);...      
+       [0,0,0,0,0,0]; T0T1_str_c_t; T0T1_str_c_p; meansdata(3,:);stddata(3,:);cidatamin(3,:);cidatamax(3,:)];
+
+    csvwrite([figdir 'descriptives_T0_T1_structure.csv'], descT0T1str)
+
+    slm     = SurfStatLinMod(Dk,M);
+    slm  	= SurfStatT(slm,GN.Affect - GN.Control1)
+    T0T1_str_ac_p   = 2*(1 - tcdf(abs(slm.t), slm.df));
+    T0T1_str_ac_t   = slm.t;
+    T0T1_str_ac_d   = 2*(slm.t)./sqrt(slm.df);
+
+    slm     = SurfStatLinMod(Dk,M);
+    slm  	= SurfStatT(slm,GN.Presence - GN.Control1)
+    T0T1_str_prc_p   = 2*(1 - tcdf(abs(slm.t), slm.df));
+    T0T1_str_prc_t   = slm.t;
+    T0T1_str_prc_d   = 2*(slm.t)./sqrt(slm.df);
+
+    slm     = SurfStatLinMod(Dk,M);
+    slm  	= SurfStatT(slm,GN.Affect - GN.Presence)
+    T0T1_str_apr_p   = 2*(1 - tcdf(abs(slm.t), slm.df));
+    T0T1_str_apr_t   = slm.t;
+    T0T1_str_apr_d   = 2*(slm.t)./sqrt(slm.df);
+
+    statsT0T1str = [T0T1_str_apr_t;T0T1_str_apr_p;T0T1_str_apr_d;...      
+       [0,0,0,0,0,0]; T0T1_str_ac_t; T0T1_str_ac_p; T0T1_str_ac_d;...      
+       [0,0,0,0,0,0]; T0T1_str_prc_t; T0T1_str_prc_p; T0T1_str_prc_d];
+
+    csvwrite([figdir 'stats_T0_T1_structure.csv'], statsT0T1str)
+
+end
+
+% T1-T3
+for Figure1 = 1
+
+    % keep the endpoints
+    Xn      = (subfield_Change);
+    keep1   = union(find(strcmp(groupN,'Perspective')),find(strcmp(groupN,'Affect')));
+    keep1   = union(keep1,    find(strcmp(groupN,'Presence')));
+    keep1   = union(keep1,    find(strcmp(groupN,'Control1')));
+
+    % keep no data
+    keep2   = mintersect(find(min(Xn,2) ~=-666), find(sum(Xn,2)~=0));
+
+    keep4   = (find(tpnum > 1))
+    keep    = mintersect(keep1, keep2, keep4); %,
+    size(mintersect(keep, find(strcmp(groupN,'Affect')))) % 
+    size(mintersect(keep, find(strcmp(groupN,'Perspective')))) % 
+    size(mintersect(keep, find(strcmp(groupN,'Control1')))) % 
+
+    Dk      = Xn(keep,:);
+    ik      = id(keep);
+    ink     = idnum(keep);
+    tk      = tpnum(keep);
+    tnk     = tp(keep);
+    gk      = group(keep);
+    g4k     = group4(keep);
+    gNk     = groupN(keep);
+    ak      = age(keep);
+    sk      = sex(keep);
+    A       = term(ak);
+    S       = term(sk);
+    G       = term(gk);
+    G4      = term(g4k);
+    GN      = term(gNk);
+    Sub     = term(ik);
+    T       = term(tnk);
+    Tn      = term(tk);
+
+
+    M     = 1  + A + S + GN  + random(Sub)  +   I;
+
+    %describtive statistics
+    keep_perspective = (find(strcmp(groupN(keep),'Perspective')))
+    keep_affect = (find(strcmp(groupN(keep),'Affect')))
+    keep_control   = (find(strcmp(groupN(keep),'Control1')))
+
+      for i = 1:6
+        meansdata(1,i) = mean(Dk(keep_perspective,i))
+        stddata(1,i) = std(Dk(keep_perspective,i))
+        SEM = std(Dk(keep_perspective,i))/sqrt(length(Dk(keep_perspective,i))); % Standard Error
+        ts = tinv([0.025  0.975],length(Dk(keep_perspective,i))-1);      % T-Score
+        cidata = mean(Dk(keep_perspective,i)) + ts*SEM;
+        cidatamin(1,i) = cidata(1);
+        cidatamax(1,i) = cidata(2);
+      end
+
+    for i = 1:6
+        meansdata(2,i) = mean(Dk(keep_affect,i))
+        stddata(2,i) = std(Dk(keep_affect,i))
+        SEM = std(Dk(keep_affect,i))/sqrt(length(Dk(keep_affect,i))); % Standard Error
+        ts = tinv([0.025  0.975],length(Dk(keep_affect,i))-1);      % T-Score
+        cidata = mean(Dk(keep_affect,i)) + ts*SEM;
+        cidatamin(2,i) = cidata(1);
+        cidatamax(2,i) = cidata(2);
+    end
+
+    for i = 1:6
+        meansdata(3,i) = mean(Dk(keep_control,i))
+        stddata(3,i) = std(Dk(keep_control,i))
+        SEM = std(Dk(keep_control,i))/sqrt(length(Dk(keep_control,i))); % Standard Error
+        ts = tinv([0.025  0.975],length(Dk(keep_control,i))-1);      % T-Score
+        cidata = mean(Dk(keep_control,i)) + ts*SEM;
+        cidatamin(3,i) = cidata(1);
+        cidatamax(3,i) = cidata(2);
+    end
+
+    slm     = SurfStatLinMod(Dk,M);
+    slm  	= SurfStatT(slm,GN.Control1);
+    T1T3_str_c_p   = 2*(1 - tcdf(abs(slm.t), slm.df));
+    T1T3_str_c_t   = slm.t;
+
+    slm     = SurfStatLinMod(Dk,M);
+    slm  	= SurfStatT(slm,GN.Perspective)
+    T1T3_str_p_p   = 2*(1 - tcdf(abs(slm.t), slm.df));
+    T1T3_str_p_t   = slm.t;
+
+    slm     = SurfStatLinMod(Dk,M);
+    slm  	= SurfStatT(slm,GN.Affect)
+    T1T3_str_a_p   = 2*(1 - tcdf(abs(slm.t), slm.df));
+    T1T3_str_a_t   = slm.t;
+
+    descT1T3str = [T1T3_str_p_t;T1T3_str_p_p;meansdata(1,:);stddata(1,:);cidatamin(1,:);cidatamax(1,:);...      
+       [0,0,0,0,0,0]; T1T3_str_a_t; T1T3_str_a_p; meansdata(2,:);stddata(2,:);cidatamin(2,:);cidatamax(2,:);...      
+       [0,0,0,0,0,0]; T1T3_str_c_t; T1T3_str_c_p; meansdata(3,:);stddata(3,:);cidatamin(3,:);cidatamax(3,:)];
+
+    csvwrite([figdir 'descriptives_T1_T3_structure.csv'], descT1T3str)
+
+
+    %% Model
+    slm     = SurfStatLinMod(Dk,M);
+    slm  	= SurfStatT(slm,GN.Affect - GN.Control1)
+    T1T3_str_ac_p   = 2*(1 - tcdf(abs(slm.t), slm.df));
+    T1T3_str_ac_t   = slm.t;
+    T1T3_str_ac_d   = 2*(slm.t)./sqrt(slm.df);
+
+    slm     = SurfStatLinMod(Dk,M);
+    slm  	= SurfStatT(slm,GN.Perspective - GN.Control1)
+    T1T3_str_pc_p   = 2*(1 - tcdf(abs(slm.t), slm.df));
+    T1T3_str_pc_t   = slm.t;
+    T1T3_str_pc_d   = 2*(slm.t)./sqrt(slm.df);
+
+    slm     = SurfStatLinMod(Dk,M);
+    slm  	= SurfStatT(slm,GN.Affect - GN.Perspective)
+    T1T3_str_ap_p   = 2*(1 - tcdf(abs(slm.t), slm.df));
+    T1T3_str_ap_t   = slm.t;
+    T1T3_str_ap_d   = 2*(slm.t)./sqrt(slm.df);
+
+    statsT1T3str = [T1T3_str_ap_t;T1T3_str_ap_p;T1T3_str_ap_d;...      
+       [0,0,0,0,0,0]; T1T3_str_ac_t; T1T3_str_ac_p; T1T3_str_ac_d;...      
+       [0,0,0,0,0,0]; T1T3_str_pc_t; T1T3_str_pc_p; T1T3_str_pc_d];
+
+    csvwrite([figdir 'stats_T1_T3_structure.csv'], statsT1T3str)
+
+
+end
+
+% T1-T3: TPNUM 2
+for Figure1 = 1
+
+    % keep the endpoints
+    Xn      = (subfield_Change);
+    keep1   = union(find(strcmp(groupN,'Perspective')),find(strcmp(groupN,'Affect')));
+    keep1   = union(keep1,    find(strcmp(groupN,'Presence')));
+    keep1   = union(keep1,    find(strcmp(groupN,'Control1')));
+
+    % keep no data
+    keep2   = mintersect(find(Xn(:,1) >-666), find(sum(Xn,2)~=0),find(abs(Xn)<1000));
+
+    keep4   = (find(tpnum == 2))
+    keep    = mintersect(keep1, keep2, keep4); %,
+
+    Dk      = Xn(keep,:);
+    ik      = id(keep);
+    ink     = idnum(keep);
+    tk      = tpnum(keep);
+    tnk     = tp(keep);
+    gk      = group(keep);
+    g4k     = group4(keep);
+    gNk     = groupN(keep);
+    ak      = age(keep);
+    sk      = sex(keep);
+    A       = term(ak);
+    S       = term(sk);
+    G       = term(gk);
+    G4      = term(g4k);
+    GN      = term(gNk);
+    Sub     = term(ik);
+    T       = term(tnk);
+    Tn      = term(tk);
+
+
+    M     = 1  + A + S + GN  + random(Sub)  +   I;
+
+    %% Model
+    slm     = SurfStatLinMod(Dk,M);
+    slm  	= SurfStatT(slm,GN.Affect - GN.Control1)
+    T1T3_str_ac_p   = 2*(1 - tcdf(abs(slm.t), slm.df));
+    T1T3_str_ac_t   = slm.t;
+    T1T3_str_ac_d   = 2*(slm.t)./sqrt(slm.df);
+
+    slm     = SurfStatLinMod(Dk,M);
+    slm  	= SurfStatT(slm,GN.Perspective - GN.Control1)
+    T1T3_str_pc_p   = 2*(1 - tcdf(abs(slm.t), slm.df));
+    T1T3_str_pc_t   = slm.t;
+    T1T3_str_pc_d   = 2*(slm.t)./sqrt(slm.df);
+
+    slm     = SurfStatLinMod(Dk,M);
+    slm  	= SurfStatT(slm,GN.Affect - GN.Perspective)
+    T1T3_str_ap_p   = 2*(1 - tcdf(abs(slm.t), slm.df));
+    T1T3_str_ap_t   = slm.t;
+    T1T3_str_ap_d   = 2*(slm.t)./sqrt(slm.df);
+
+    statsT1T3str = [T1T3_str_ap_t;T1T3_str_ap_p;T1T3_str_ap_d;...      
+       [0,0,0,0,0,0]; T1T3_str_ac_t; T1T3_str_ac_p; T1T3_str_ac_d;...      
+       [0,0,0,0,0,0]; T1T3_str_pc_t; T1T3_str_pc_p; T1T3_str_pc_d];
+
+    csvwrite([figdir 'stats_T1_T3_structure_TP2.csv'], statsT1T3str)
+
+
+end
+
+% T1-T3: TPNUM 3
+for Figure1 = 1
+
+    % keep the endpoints
+    Xn      = (subfield_Change);
+    keep1   = union(find(strcmp(groupN,'Perspective')),find(strcmp(groupN,'Affect')));
+    keep1   = union(keep1,    find(strcmp(groupN,'Presence')));
+    keep1   = union(keep1,    find(strcmp(groupN,'Control1')));
+
+    % keep no data
+    keep2   = mintersect(find(Xn(:,1) >-666), find(sum(Xn,2)~=0),find(abs(Xn)<1000));
+
+    keep4   = (find(tpnum == 3))
+    keep    = mintersect(keep1, keep2, keep4); %,
+
+    Dk      = Xn(keep,:);
+    ik      = id(keep);
+    ink     = idnum(keep);
+    tk      = tpnum(keep);
+    tnk     = tp(keep);
+    gk      = group(keep);
+    g4k     = group4(keep);
+    gNk     = groupN(keep);
+    ak      = age(keep);
+    sk      = sex(keep);
+    A       = term(ak);
+    S       = term(sk);
+    G       = term(gk);
+    G4      = term(g4k);
+    GN      = term(gNk);
+    Sub     = term(ik);
+    T       = term(tnk);
+    Tn      = term(tk);
+
+
+    M     = 1  + A + S + GN  + random(Sub)  +   I;
+
+    %% Model
+    slm     = SurfStatLinMod(Dk,M);
+    slm  	= SurfStatT(slm,GN.Affect - GN.Control1)
+    T1T3_str_ac_p   = 2*(1 - tcdf(abs(slm.t), slm.df));
+    T1T3_str_ac_t   = slm.t;
+    T1T3_str_ac_d   = 2*(slm.t)./sqrt(slm.df);
+
+    slm     = SurfStatLinMod(Dk,M);
+    slm  	= SurfStatT(slm,GN.Perspective - GN.Control1)
+    T1T3_str_pc_p   = 2*(1 - tcdf(abs(slm.t), slm.df));
+    T1T3_str_pc_t   = slm.t;
+    T1T3_str_pc_d   = 2*(slm.t)./sqrt(slm.df);
+
+    slm     = SurfStatLinMod(Dk,M);
+    slm  	= SurfStatT(slm,GN.Affect - GN.Perspective)
+    T1T3_str_ap_p   = 2*(1 - tcdf(abs(slm.t), slm.df));
+    T1T3_str_ap_t   = slm.t;
+    T1T3_str_ap_d   = 2*(slm.t)./sqrt(slm.df);
+
+    statsT1T3str = [T1T3_str_ap_t;T1T3_str_ap_p;T1T3_str_ap_d;...      
+       [0,0,0,0,0,0]; T1T3_str_ac_t; T1T3_str_ac_p; T1T3_str_ac_d;...      
+       [0,0,0,0,0,0]; T1T3_str_pc_t; T1T3_str_pc_p; T1T3_str_pc_d];
+
+    csvwrite([figdir 'stats_T1_T3_structure_TP3.csv'], statsT1T3str)
+end
+
+% T1-T3: GROUP 1
+for Figure1 = 1
+
+    % keep the endpoints
+    Xn      = (subfield_Change);
+    keep1   = union(find(strcmp(groupN,'Perspective')),find(strcmp(groupN,'Affect')));
+    keep1   = union(keep1,    find(strcmp(groupN,'Presence')));
+    keep1   = union(keep1,    find(strcmp(groupN,'Control1')));
+
+    % keep no data
+    keep2   = mintersect(find(Xn(:,1) >-666), find(sum(Xn,2)~=0),find(abs(Xn)<1000));
+
+    keep4   = find(strcmp(group4,'Group_1'));
+    keep    = mintersect(keep1, keep2, keep4); %,
+
+    Dk      = Xn(keep,:);
+    ik      = id(keep);
+    ink     = idnum(keep);
+    tk      = tpnum(keep);
+    tnk     = tp(keep);
+    gk      = group(keep);
+    g4k     = group4(keep);
+    gNk     = groupN(keep);
+    ak      = age(keep);
+    sk      = sex(keep);
+    A       = term(ak);
+    S       = term(sk);
+    G       = term(gk);
+    G4      = term(g4k);
+    GN      = term(gNk);
+    Sub     = term(ik);
+    T       = term(tnk);
+    Tn      = term(tk);
+
+
+    M     = 1  + A + S + GN  + random(Sub)  +   I;
+
+    %% Model
+
+    slm     = SurfStatLinMod(Dk,M);
+    slm  	= SurfStatT(slm,GN.Affect - GN.Perspective)
+    T1T3_str_ap_p   = 2*(1 - tcdf(abs(slm.t), slm.df));
+    T1T3_str_ap_t   = slm.t;
+    T1T3_str_ap_d   = 2*(slm.t)./sqrt(slm.df);
+
+    statsT1T3str = [T1T3_str_ap_t; T1T3_str_ap_p; T1T3_str_ap_d];
+
+    csvwrite([figdir 'stats_T1_T3_structure_G1.csv'], statsT1T3str)
+
+end
+
+% T1-T3: GROUP 2
+for Figure1 = 1
+
+    % keep the endpoints
+    Xn      = (subfield_Change);
+    keep1   = union(find(strcmp(groupN,'Perspective')),find(strcmp(groupN,'Affect')));
+    keep1   = union(keep1,    find(strcmp(groupN,'Presence')));
+    keep1   = union(keep1,    find(strcmp(groupN,'Control1')));
+
+    % keep no data
+    keep2   = mintersect(find(Xn(:,1) >-666), find(sum(Xn,2)~=0),find(abs(Xn)<1000));
+
+    keep4   = find(strcmp(group4,'Group_2'));
+    keep    = mintersect(keep1, keep2, keep4); %,
+
+    Dk      = Xn(keep,:);
+    ik      = id(keep);
+    ink     = idnum(keep);
+    tk      = tpnum(keep);
+    tnk     = tp(keep);
+    gk      = group(keep);
+    g4k     = group4(keep);
+    gNk     = groupN(keep);
+    ak      = age(keep);
+    sk      = sex(keep);
+    A       = term(ak);
+    S       = term(sk);
+    G       = term(gk);
+    G4      = term(g4k);
+    GN      = term(gNk);
+    Sub     = term(ik);
+    T       = term(tnk);
+    Tn      = term(tk);
+
+
+    M     = 1  + A + S + GN  + random(Sub)  +   I;
+
+    %% Model
+    slm     = SurfStatLinMod(Dk,M);
+    slm  	= SurfStatT(slm,GN.Affect - GN.Perspective)
+    T1T3_str_ap_p   = 2*(1 - tcdf(abs(slm.t), slm.df));
+    T1T3_str_ap_t   = slm.t;
+    T1T3_str_ap_d   = 2*(slm.t)./sqrt(slm.df);
+
+    statsT1T3str = [T1T3_str_ap_t;T1T3_str_ap_p;T1T3_str_ap_d];
+
+    csvwrite([figdir 'stats_T1_T3_structure_G2.csv'], statsT1T3str)
+
+end
+
+% overall change
+for Figure1 = 1
+    % keep the endpoints
+    Xn      = (subfield_Change_bl);
+    keep1   = union(find(strcmp(groupN,'Perspective')),find(strcmp(groupN,'Affect')));
+    keep1   = union(keep1,    find(strcmp(groupN,'Presence')));
+    keep1   = union(keep1,    find(strcmp(groupN,'Control1')));
+
+    % keep no data
+    keep2   = mintersect(find(Xn(:,1) >-666), find(sum(Xn,2)~=0),find(abs(Xn)<1000));
+
+    keep4   = (find(tpnum >2))
+    keep    = mintersect(keep1, keep2, keep4); %,
+
+    Dk      = Xn(keep,:);
+    ik      = id(keep);
+    ink     = idnum(keep);
+    tk      = tpnum(keep);
+    tnk     = tp(keep);
+    gk      = group(keep);
+    g4k     = group4(keep);
+    gNk     = groupN(keep);
+    ak      = age(keep);
+    sk      = sex(keep);
+    A       = term(ak);
+    S       = term(sk);
+    G       = term(gk);
+    G4      = term(g4k);
+    GN      = term(gNk);
+    Sub     = term(ik);
+    T       = term(tnk);
+    Tn      = term(tk);
+
+    %all
+    g2k         = gNk;
+    g2k(strcmp(gNk,'Control1')) = {'Control'};
+    g2k(~strcmp(gNk,'Control1')) = {'Training'};
+
+    G2  = term(g2k);
+
+    M     = 1  + A + S + G2 + random(Sub)  + I;
+
+    slm     = SurfStatLinMod(Dk,M);
+    slm  	= SurfStatT(slm,(G2.Training)-(G2.Control))
+
+    p   = 2*(1 - tcdf(abs(slm.t), slm.df));
+
+    slm     = SurfStatLinMod(Dk,M);
+    slm  	= SurfStatT(slm,(G2.Training)-(G2.Control))
+    T0T3_str_tc_p   = 2*(1 - tcdf(abs(slm.t), slm.df));
+    T0T3_str_tc_t   = slm.t;
+    T0T3_str_tc_d   = 2*(slm.t)./sqrt(slm.df);
+
+    statsT0T3str = [T0T3_str_tc_t;T0T3_str_tc_p;T0T3_str_tc_d];
+
+    csvwrite([figdir 'stats_T0_T3_structure.csv'], statsT0T3str)
+
+end
+
+% Figure 3 - behavior ******
+for CARxhipp = 1
+    for kk =  1:6
+        for k= 1:3
+            Xn      = subfield_Change(:,kk);
+            keep2   = intersect(find(Xn(:,1) ~=-666), find(sum(Xn,2)~=0));
+
+            keep1   = find(strcmp(groupN,'Affect'));
+            keep4   = find((~strcmp(group4,'Group3')));
+            keep6   = find(abs(sum(carChange_last,2))~=0);
+            keep7   = find(abs((carChange_last(:,k)))~=666);
+            keep8   = find(~isnan(sum(carChange_last,2)));
+            keep    = mintersect(keep1,keep2, keep4, keep6, keep7, keep8);
+
+            size(keep)
+            size(mintersect(keep, find(strcmp(groupN,'Affect')))) % N = 184
+            size(intersect(keep,find(strcmp(sex,'female'))))
+            mean(age(keep))
+            std(age(keep))
+            min(age(keep))
+            max(age(keep))
+            size(find(strcmp(group4(keep),'Group_1')& (strcmp(groupN(keep),'Affect'))))
+            size(find(strcmp(group4(keep),'Group_2')& (strcmp(groupN(keep),'Affect'))))
+            %size(find(strcmp(group4(keep),'Group3')& (strcmp(groupN(keep),'Affect'))))
+
+            Ck      = Xn(keep,:);
+            ik      = id(keep,:);
+            ink     = idnum(keep);
+            tk      = tpnum(keep,:);
+            tnk     = tp(keep,:);
+            gk      = group(keep);
+            g4k     = group4(keep);
+            gNk     = groupN(keep);
+            ak      = age(keep);
+            sk      = sex(keep);
+            Compk   = carChange_last(keep,k);
+            A       = term(ak);
+            S       = term(sk);
+            G       = term(gk);
+            G4      = term(g4k);
+            GN      = term(gNk);
+            Sub     = term(ik);
+            CMP     = term(Compk);
+            T       = term(tk);
+            Tn      = term(tnk);
+
+
+            M     = 1  + A + S  + term(Compk);
+
+            slm     = SurfStatLinMod(Ck,M);
+            slm  	= SurfStatT(slm,(Compk))
+
+            p =  2*(1 - tcdf(abs(slm.t),slm.df))
+
+            stress_hipp(k,kk)  = slm.t;
+            stress_p(k,kk) = p;
+
+            if( p <= 0.05)
+                         f = figure,
+                         scatter(Compk,(Ck),'filled','k'),lsline
+                         print(f, [figdir, 'F3.structure',num2str(kk),'.stress',num2str(k),'.png'], '-dpng');
+                         close(f);
+            end
+
+        end
+    end
+ 
+    stress_struct = [stress_hipp(1,:);stress_p(1,:);stress_hipp(2,:);stress_p(2,:);...
+        stress_hipp(3,:);stress_p(3,:)];
+
+    csvwrite([figdir 'stress_structure.csv'], stress_struct)
+
+
+end
+
+%relationship with the hair
+for CARxhipp = 1
+    for kk =  1:6
+        for k= 1:3
+            Xn =  subfield_Change(:,kk);
+            keep2   = intersect(find(Xn(:,1) >-666), find(sum(Xn,2)~=0));
+            keep1   = find(strcmp(groupN,'Affect'));
+         
+            keep4   = find((~strcmp(group4,'Group3')));
+            keep6   = find(abs(sum(hairChange_last,2))~=0);
+            keep7   = find(abs((hairChange_last(:,k)))~=666);
+            keep8   = find(~isnan(sum(hairChange_last,2)));
+            keep    = mintersect(keep1,keep2, keep4, keep6, keep7, keep8);
+
+            size(keep)
+            size(mintersect(keep, find(strcmp(groupN,'Affect')))) % N = 184
+            size(intersect(keep,find(strcmp(sex,'female'))))
+            mean(age(keep))
+            std(age(keep))
+            min(age(keep))
+            max(age(keep))
+            size(find(strcmp(group4(keep),'Group_1')& (strcmp(groupN(keep),'Affect'))))
+            size(find(strcmp(group4(keep),'Group_2')& (strcmp(groupN(keep),'Affect'))))
+            %size(find(strcmp(group4(keep),'Group3')& (strcmp(groupN(keep),'Affect'))))
+
+            Ck      = subfield_Change(keep,kk);
+            ik      = id(keep,:);
+            ink     = idnum(keep);
+            tk      = tpnum(keep,:);
+            tnk     = tp(keep,:);
+            gk      = group(keep);
+            g4k     = group4(keep);
+            gNk     = groupN(keep);
+            ak      = age(keep);
+            sk      = sex(keep);
+            Compk   = hairChange_last(keep,k);
+            A       = term(ak);
+            S       = term(sk);
+            G       = term(gk);
+            G4      = term(g4k);
+            GN      = term(gNk);
+            Sub     = term(ik);
+            CMP     = term(Compk);
+            T       = term(tk);
+            Tn      = term(tnk);
+
+            M        = 1 + A + S + CMP +CMP*GN  + random(Sub) + I;
+
+            slm     = SurfStatLinMod(Ck,M);
+            slm  	= SurfStatT(slm,(GN.Affect.*Compk))
+
+            p =  2*(1 - tcdf(abs(slm.t),slm.df))
+
+            hair_hippc(k,kk)  = slm.t;
+            hair_hippcr(k,kk)  = sqrt(slm.t.^2 / (slm.t.^2 + slm.df)).*sign(slm.t)
+            hair_cp(k,kk) = p;
+
+        end
+    end
+    hair_struct = [hair_hippc(1,:);hair_cp(1,:);hair_hippc(2,:);hair_cp(2,:);...
+        hair_hippc(3,:);hair_cp(3,:)];
+
+    csvwrite([figdir 'hair_structure.csv'], hair_struct)
+
+end
+
+%overall       
+for CARxhipp = 1
+    for kk =  1:6
+        for k= 1:3
+            Xn      = subfield_Change(:,kk);
+            keep2   = intersect(find(Xn(:,1) >-666), find(sum(Xn,2)~=0));
+
+            keep1   = union(find(strcmp(groupN,'Perspective')),find(strcmp(groupN,'Affect')));
+            keep1   = union(keep1,    find(strcmp(groupN,'Presence')));
+  
+                        keep4   = find((~strcmp(group4,'Group3')));
+
+            keep6   = find(abs(sum(carChange_last,2))~=0);
+            keep7   = find(abs((carChange_last(:,k)))~=666);
+            keep8   = find(~isnan(sum(carChange_last,2)));
+            keep    = mintersect(keep1,keep2, keep4, keep6, keep7, keep8);
+
+            size(keep)
+            size(mintersect(keep, find(strcmp(groupN,'Affect')))) % N = 184
+            size(intersect(keep,find(strcmp(sex,'female'))))
+            mean(age(keep))
+            std(age(keep))
+            min(age(keep))
+            max(age(keep))
+            size(find(strcmp(group4(keep),'Group_1')& (strcmp(groupN(keep),'Affect'))))
+            size(find(strcmp(group4(keep),'Group_2')& (strcmp(groupN(keep),'Affect'))))
+            %size(find(strcmp(group4(keep),'Group3')& (strcmp(groupN(keep),'Affect'))))
+
+            Ck      = Xn(keep,:);
+            ik      = id(keep,:);
+            ink     = idnum(keep);
+            tk      = tpnum(keep,:);
+            tnk     = tp(keep,:);
+            gk      = group(keep);
+            g4k     = group4(keep);
+            gNk     = groupN(keep);
+            ak      = age(keep);
+            sk      = sex(keep);
+            Compk   = carChange_last(keep,k);
+            A       = term(ak);
+            S       = term(sk);
+            G       = term(gk);
+            G4      = term(g4k);
+            GN      = term(gNk);
+            Sub     = term(ik);
+            CMP     = term(Compk);
+            T       = term(tk);
+            Tn      = term(tnk);
+
+
+            M     = 1  + A + S  + term(Compk) + random(Sub) + I;
+
+            slm     = SurfStatLinMod(Ck,M);
+            slm  	= SurfStatT(slm,(Compk))
+
+            p =  2*(1 - tcdf(abs(slm.t),slm.df))
+
+            stress_hipp(k,kk)  = slm.t;
+            stress_hippr(k,kk)  = sqrt(slm.t.^2 / (slm.t.^2 + slm.df)).*sign(slm.t)
+            stress_p(k,kk) = p;
+        end
+    end
+  stress_struct = [stress_hipp(1,:);stress_p(1,:);stress_hipp(2,:);stress_p(2,:);...
+        stress_hipp(3,:);stress_p(3,:)];
+
+    csvwrite([figdir 'stress_structure_all.csv'], stress_struct)
+
+end
+
+%relationship with the hair
+for CARxhipp = 1
+    for kk =  1:6
+        for k= 1:3
+            Xn =  subfield_Change(:,kk);
+            keep2   = intersect(find(Xn(:,1) >-666), find(sum(Xn,2)~=0));
+            keep1   = union(find(strcmp(groupN,'Perspective')),find(strcmp(groupN,'Affect')));
+            keep1   = union(keep1,    find(strcmp(groupN,'Presence')));      
+            keep4   = find((~strcmp(group4,'Group3')));
+            keep6   = find(abs(sum(hairChange_last,2))~=0);
+            keep7   = find(abs((hairChange_last(:,k)))~=666);
+            keep8   = find(~isnan(sum(hairChange_last,2)));
+            keep    = mintersect(keep1,keep2, keep4, keep6, keep7, keep8);
+
+            size(keep)
+            size(mintersect(keep, find(strcmp(groupN,'Affect')))) % N = 184
+            size(intersect(keep,find(strcmp(sex,'female'))))
+            mean(age(keep))
+            std(age(keep))
+            min(age(keep))
+            max(age(keep))
+            size(find(strcmp(group4(keep),'Group_1')& (strcmp(groupN(keep),'Affect'))))
+            size(find(strcmp(group4(keep),'Group_2')& (strcmp(groupN(keep),'Affect'))))
+            %size(find(strcmp(group4(keep),'Group3')& (strcmp(groupN(keep),'Affect'))))
+
+            Ck      = subfield_Change(keep,kk);
+            ik      = id(keep,:);
+            ink     = idnum(keep);
+            tk      = tpnum(keep,:);
+            tnk     = tp(keep,:);
+            gk      = group(keep);
+            g4k     = group4(keep);
+            gNk     = groupN(keep);
+            ak      = age(keep);
+            sk      = sex(keep);
+            Compk   = hairChange_last(keep,k);
+            A       = term(ak);
+            S       = term(sk);
+            G       = term(gk);
+            G4      = term(g4k);
+            GN      = term(gNk);
+            Sub     = term(ik);
+            CMP     = term(Compk);
+            T       = term(tk);
+            Tn      = term(tnk);
+
+            M        = 1 + A + S + CMP +CMP*GN  + random(Sub) + I;
+
+            slm     = SurfStatLinMod(Ck,M);
+            slm  	= SurfStatT(slm,(GN.Affect.*Compk))
+
+            p =  2*(1 - tcdf(abs(slm.t),slm.df))
+
+            hair_hippc(k,kk)  = slm.t;
+            hair_hippcr(k,kk)  = sqrt(slm.t.^2 / (slm.t.^2 + slm.df)).*sign(slm.t)
+            hair_cp(k,kk) = p;
+
+        end
+    end
+    hair_struct = [hair_hippc(1,:);hair_cp(1,:);hair_hippc(2,:);hair_cp(2,:);...
+        hair_hippc(3,:);hair_cp(3,:)];
+
+    csvwrite([figdir 'hair_structure_all.csv'], hair_struct)
+
+end
+
+%% Functional analysis
+
+for make_mask = 1
+
+    for k = 1:6
+        var_used    =  squeeze(fc_subfieldr(:,k,:));
+        keeptestT0  = studykeep.*(tpnum==0);
+
+        subfield_mask1 = nanmean(var_used(keeptestT0==1,:));
+        if(k<4)
+            subfield_mask1 = subfield_mask1(1:200);
+            subfield_mask1(201:400) = 0;
+        elseif(k>3)
+            subfield_mask1 = subfield_mask1(201:400);
+            subfield_mask1(201:400) = subfield_mask1;
+            subfield_mask1(1:200) = 0;
+        end
+        map2fs5 = zeros(20484,1);
+        for j = 1:400
+            map2fs5(yeo400_fsa5==j)  = subfield_mask1(j);
+        end
+
+%         f=figure,
+%         BoSurfStatViewData(map2fs5,SN,'')
+%         colormap([cbrewer('seq','YlOrRd',11)])
+%         %print(f, fullfile(figdir, ['subfieldmask_all',  num2str(k), '.png']), '-dpng');
+        %close(f)
+
+        subfield_mask = nanmean(var_used(keeptestT0==1,:));
+        if(k<4)
+            subfield_mask = subfield_mask(1:200);
+            subfield_mask(subfield_mask < prctile(subfield_mask,90)) = 0;
+            subfield_mask(201:400) = 0;
+        elseif(k>3)
+            subfield_mask = subfield_mask(201:400);
+            subfield_mask(subfield_mask < prctile(subfield_mask,90)) = 0;
+            subfield_mask(201:400) = subfield_mask;
+            subfield_mask(1:200) = 0;
+        end
+        map2fs5 = zeros(20484,1);
+        for j = 1:400
+            map2fs5(yeo400_fsa5==j)  = subfield_mask(j).*subfield_mask1(j);
+        end
+        f=figure,
+        BoSurfStatViewData(map2fs5,SM,'')
+        BoSurfStatColLim([0 1])
+        colormap([cbrewer('seq','Reds',50)])
+        print(f, fullfile(figdir, ['subfieldmask_90',  num2str(k), '.png']), '-dpng');
+        %close(f)
+        subfield_masks(:,k) = subfield_mask;
+    end
+
+end
+
+to_save_hc.masks =  subfield_masks;
+
+FC_change = zeros(size(fc_subfieldr));
+FC_change_bl = FC_change;
+for k = 1:6
+    var_used    = squeeze(fc_subfieldr(:,k,:));
+    keeptest    = studykeep;
+    KZ          = var_used;
+    minit = zeros(size(id));
+    tp_t0_there = minit;
+    tp_t1_there = minit;
+    tp_t2_there = minit;
+    tp_t3_there = minit;
+    daysfrombl  = minit;
+    daysfromt1  = minit;
+    daysfromt2  = minit;
+    ZChange_bl  = zeros(size(KZ))-666;
+    ZChange_t1  = zeros(size(KZ))-666;
+    ZChange_t2  = zeros(size(KZ))-666;
+
+    keep = find(keeptest==1)
+    % sample size
+    size(keep)
+    % sample size T0
+    size(intersect(keep,find(tpnum==0)))
+    size(mintersect(keep,find(tpnum==0),find(strcmp(group4,'Group3'))))
+  
+    % sample size T1
+    size(intersect(keep,find(tpnum==1)))
+     size(mintersect(keep,find(tpnum==1),find(strcmp(group4,'Group3'))))
+  
+    % sample size T2
+    size(intersect(keep,find(tpnum==2)))
+    % sample size T3
+    size(intersect(keep,find(tpnum==3)))
+
+
+
+    for i = 1:length(id)
+        if keeptest(i,:) == 1
+            i
+            inter0 		  = intersect(find(tpnum==0),find(idnum==idnum(i)));
+            inter1        = intersect(find(tpnum==1),find(idnum==idnum(i)));
+            inter2        = intersect(find(tpnum==2),find(idnum==idnum(i)));
+            inter3        = intersect(find(tpnum==3),find(idnum==idnum(i)));
+
+            tp_t0_there(i,1)    = ~isempty(inter0) .* keeptest(i)==1;
+            if ~isempty(inter0)
+                tp_t0_there(i,1) =  tp_t0_there(i,1) .* keeptest(inter0);
+            end
+            tp_t1_there(i,1)    = ~isempty(inter1) .* keeptest(i)==1;
+            if ~isempty(inter1)
+                tp_t1_there(i,1) =  tp_t1_there(i,1) .* keeptest(inter1);
+            end
+            tp_t2_there(i,1)    = ~isempty(inter2) .* keeptest(i)==1;
+            if ~isempty(inter2)
+                tp_t2_there(i,1) =  tp_t2_there(i,1) .* keeptest(inter2);
+            end
+            tp_t3_there(i,1)    = ~isempty(inter3) .* keeptest(i)==1;
+            if ~isempty(inter3)
+                tp_t3_there(i,1) =  tp_t3_there(i,1) .* keeptest(inter3);
+            end
+            if keeptest(inter0)~=0
+                daysfrombl(i,1)    = days(i)-days(inter0);
+                ZChange_bl(i,:)    = (KZ(i,:) - KZ(inter0,:));
+            end
+            if keeptest(inter1)~=0
+                daysfromt1(i,1)    = days(i)-days(inter1);
+                ZChange_t1(i,:)    = (KZ(i,:) - KZ(inter1,:));
+            end
+            if keeptest(inter2)~=0
+                daysfromt2(i,1)    = days(i)-days(inter2);
+                ZChange_t2(i,:)    = (KZ(i,:) - KZ(inter2,:));
+            end
+        else
+        end
+    end
+
+    ZChange_last = zeros(size(ZChange_bl));
+    ZChange_last(strcmp(group4,'Group_1') & strcmp(tp,'T1'),:) = ZChange_bl(strcmp(group4,'Group_1') & strcmp(tp,'T1'),:);
+    ZChange_last(strcmp(group4,'Group_1') & strcmp(tp,'T2'),:) = ZChange_t1(strcmp(group4,'Group_1') & strcmp(tp,'T2'),:);
+    ZChange_last(strcmp(group4,'Group_1') & strcmp(tp,'T3'),:) = ZChange_t2(strcmp(group4,'Group_1') & strcmp(tp,'T3'),:);
+
+    ZChange_last(strcmp(group4,'Group_2') & strcmp(tp,'T1'),:) = ZChange_bl(strcmp(group4,'Group_2') & strcmp(tp,'T1'),:);
+    ZChange_last(strcmp(group4,'Group_2') & strcmp(tp,'T2'),:) = ZChange_t1(strcmp(group4,'Group_2') & strcmp(tp,'T2'),:);
+    ZChange_last(strcmp(group4,'Group_2') & strcmp(tp,'T3'),:) = ZChange_t2(strcmp(group4,'Group_2') & strcmp(tp,'T3'),:);
+
+    ZChange_last(strcmp(group4,'Group3') & strcmp(tp,'T1'),:)  = ZChange_bl(strcmp(group4,'Group3')  & strcmp(tp,'T1'),:);
+    ZChange_last(strcmp(group4,'Group3') & strcmp(tp,'T2'),:)  = ZChange_t1(strcmp(group4,'Group3') & strcmp(tp,'T2'),:);
+    ZChange_last(strcmp(group4,'Group3') & strcmp(tp,'T3'),:)  = ZChange_t2(strcmp(group4,'Group3') & strcmp(tp,'T3'),:);
+
+    ZChange_last(strcmp(group4,'Control') & strcmp(tp,'T1'),:) = ZChange_bl(strcmp(group4,'Control') & strcmp(tp,'T1'),:);
+    ZChange_last(strcmp(group4,'Control') & strcmp(tp,'T2'),:) = ZChange_t1(strcmp(group4,'Control') & strcmp(tp,'T2'),:);
+    ZChange_last(strcmp(group4,'Control') & strcmp(tp,'T3'),:) = ZChange_t2(strcmp(group4,'Control') & strcmp(tp,'T3'),:);
+
+    FC_change(:,k,:) = ZChange_last;
+    FC_change_bl(:,k,:) = ZChange_bl;
+end
+
+% Descriptives T0-T1
+for Figure2 = 1
+    for i = 1:6
+        % keep the endpoints
+        Xn      = squeeze((FC_change(:,i,:)));
+        keep1   = union(find(strcmp(groupN,'Perspective')),find(strcmp(groupN,'Affect')));
+        keep1   = union(keep1,    find(strcmp(groupN,'Presence')));
+        keep1   = union(keep1,    find(strcmp(groupN,'Control1')));
+
+        % keep no data
+        keep2   = intersect(find(Xn(:,1) >-666), find(sum(Xn,2)~=0));
+
+        keep4   = find(tpnum ==1)
+        keep    = mintersect(keep1, keep2, keep4); %,
+        size(mintersect(keep, find(strcmp(groupN,'Affect')))) %
+        size(mintersect(keep, find(strcmp(groupN,'Presence')))) %
+        size(mintersect(keep, find(strcmp(groupN,'Control1')))) %
+
+        Dk      = Xn(keep,:);
+        ik      = id(keep);
+        ink     = idnum(keep);
+        tk      = tpnum(keep);
+        tnk     = tp(keep);
+        gk      = group(keep);
+        g4k     = group4(keep);
+        gNk     = groupN(keep);
+        ak      = age(keep);
+        sk      = sex(keep);
+        A       = term(ak);
+        S       = term(sk);
+        G       = term(gk);
+        G4      = term(g4k);
+        GN      = term(gNk);
+        Sub     = term(ik);
+        T       = term(tnk);
+        Tn      = term(tk);
+
+        M     = 1  + A + S + GN + random(Sub)  + I;
+
+        slm     = SurfStatLinMod(mean(Dk(:,subfield_masks(:,i)>0),2),M);
+        slm  	= SurfStatT(slm,(GN.Affect-GN.Presence));
+        p = 2*(1 -tcdf(abs(slm.t),slm.df));
+        t_val(1,i,:) = slm.t;
+        p_val(1,i,:) = p;
+        d_val(1,i,:) = 2*(slm.t)./sqrt(slm.df);
+
+        slm     = SurfStatLinMod(mean(Dk(:,subfield_masks(:,i)>0),2),M);
+        slm  	= SurfStatT(slm,(GN.Presence-GN.Control1));
+        p = 2*(1 -tcdf(abs(slm.t),slm.df));
+        t_val(2,i,:) = slm.t;
+        p_val(2,i,:) = p;
+        d_val(2,i,:) = 2*(slm.t)./sqrt(slm.df);
+
+        slm     = SurfStatLinMod(mean(Dk(:,subfield_masks(:,i)>0),2),M);
+        slm  	= SurfStatT(slm,(GN.Affect-GN.Control1));
+        p = 2*(1 -tcdf(abs(slm.t),slm.df));
+        t_val(3,i,:) = slm.t;
+        p_val(3,i,:) = p;
+        d_val(3,i,:) = 2*(slm.t)./sqrt(slm.df);
+
+        slm     = SurfStatLinMod(mean(Dk(:,subfield_masks(:,i)>0),2),M);
+        slm  	= SurfStatT(slm,(GN.Presence));
+        p = 2*(1 -tcdf(abs(slm.t),slm.df));
+        t_val(4,i,:) = slm.t;
+        p_val(4,i,:) = p;
+
+        slm     = SurfStatLinMod(mean(Dk(:,subfield_masks(:,i)>0),2),M);
+        slm  	= SurfStatT(slm,(GN.Affect));
+        p = 2*(1 -tcdf(abs(slm.t),slm.df));
+        t_val(5,i,:) = slm.t;
+        p_val(5,i,:) = p;
+
+        slm     = SurfStatLinMod(mean(Dk(:,subfield_masks(:,i)>0),2),M);
+        slm  	= SurfStatT(slm,(GN.Control1));
+        p = 2*(1 -tcdf(abs(slm.t),slm.df));
+        t_val(6,i,:) = slm.t;
+        p_val(6,i,:) = p;
+
+        %describtive statistics
+        keep_presence = (find(strcmp(groupN(keep),'Presence')))
+        keep_affect = (find(strcmp(groupN(keep),'Affect')))
+        keep_control   = (find(strcmp(groupN(keep),'Control1')))
+
+        xx= mean(Dk(keep_presence,subfield_masks(:,i)>0),2);
+        meansdata(1,i) = mean(xx);
+        stddata(1,i) = std(xx);
+        SEM = std(xx)/sqrt(length(xx)); % Standard Error
+        ts = tinv([0.025  0.975],length(xx)-1);      % T-Score
+        cidata = mean(xx) + ts*SEM;
+        cidatamin(1,i) = cidata(1);
+        cidatamax(1,i) = cidata(2);
+
+        xx= mean(Dk(keep_affect,subfield_masks(:,i)>0),2);
+        meansdata(2,i) = mean(xx);
+        stddata(2,i) = std(xx);
+        SEM = std(xx)/sqrt(length(xx)); % Standard Error
+        ts = tinv([0.025  0.975],length(xx)-1);      % T-Score
+        cidata = mean(xx) + ts*SEM;
+        cidatamin(2,i) = cidata(1);
+        cidatamax(2,i) = cidata(2);
+
+        xx= mean(Dk(keep_control,subfield_masks(:,i)>0),2);
+        meansdata(3,i) = mean(xx);
+        stddata(3,i) = std(xx);
+        SEM = std(xx)/sqrt(length(xx)); % Standard Error
+        ts = tinv([0.025  0.975],length(xx)-1);      % T-Score
+        cidata = mean(xx) + ts*SEM;
+        cidatamin(3,i) = cidata(1);
+        cidatamax(3,i) = cidata(2);
+
+    end
+
+   
+    descT0T1fc = [t_val(4,:,:);p_val(4,:,:);meansdata(1,:);stddata(1,:);cidatamin(1,:);cidatamax(1,:);...      
+       [0,0,0,0,0,0]; t_val(5,:,:); p_val(5,:,:); meansdata(2,:);stddata(2,:);cidatamin(2,:);cidatamax(2,:);...      
+       [0,0,0,0,0,0]; t_val(6,:,:); p_val(6,:,:); meansdata(3,:);stddata(3,:);cidatamin(3,:);cidatamax(3,:)];
+
+    csvwrite([figdir 'descriptives_T0_T1_FC.csv'], descT0T1fc)
+    
+    statsT0T1fc = [t_val(1,:,:);p_val(1,:,:);d_val(1,:,:);...      
+       [0,0,0,0,0,0]; t_val(3,:,:);p_val(3,:,:);d_val(3,:,:);...      
+       [0,0,0,0,0,0]; t_val(2,:,:);p_val(2,:,:);d_val(2,:,:)];
+
+    csvwrite([figdir 'stats_T0_T1_FC.csv'], statsT0T1fc)
+
+
+end
+
+% Descriptives T1-T3
+for Figure2 = 1
+    for i = 1:6
+        % keep the endpoints
+        Xn      = squeeze((FC_change(:,i,:)));
+        keep1   = union(find(strcmp(groupN,'Perspective')),find(strcmp(groupN,'Affect')));
+        keep1   = union(keep1,    find(strcmp(groupN,'Presence')));
+        keep1   = union(keep1,    find(strcmp(groupN,'Control1')));
+
+        % keep no data
+        keep2   = intersect(find(Xn(:,1) >-666), find(sum(Xn,2)~=0));
+
+        keep4   = find(tpnum >1);
+        keep    = mintersect(keep1, keep2, keep4); %,
+        size(mintersect(keep, find(strcmp(groupN,'Affect')))); %
+        size(mintersect(keep, find(strcmp(groupN,'Perspective')))); %
+        size(mintersect(keep, find(strcmp(groupN,'Control1')))); %
+
+        Dk      = Xn(keep,:);
+        ik      = id(keep);
+        ink     = idnum(keep);
+        tk      = tpnum(keep);
+        tnk     = tp(keep);
+        gk      = group(keep);
+        g4k     = group4(keep);
+        gNk     = groupN(keep);
+        ak      = age(keep);
+        sk      = sex(keep);
+        A       = term(ak);
+        S       = term(sk);
+        G       = term(gk);
+        G4      = term(g4k);
+        GN      = term(gNk);
+        Sub     = term(ik);
+        T       = term(tnk);
+        Tn      = term(tk);
+
+        M     = 1  + A + S + GN + random(Sub)  + I;
+
+        slm     = SurfStatLinMod(mean(Dk(:,subfield_masks(:,i)>0),2),M);
+        slm  	= SurfStatT(slm,(GN.Affect-GN.Perspective));
+        p = 2*(1 -tcdf(abs(slm.t),slm.df));
+        t_val(1,i,:) = slm.t;
+        p_val(1,i,:) = p;
+        d_val(1,i,:)   = 2*(slm.t)./sqrt(slm.df)
+
+
+        slm     = SurfStatLinMod(mean(Dk(:,subfield_masks(:,i)>0),2),M);
+        slm  	= SurfStatT(slm,(GN.Perspective-GN.Control1));
+        p = 2*(1 -tcdf(abs(slm.t),slm.df));
+        t_val(2,i,:) = slm.t;
+        p_val(2,i,:) = p;
+
+        slm     = SurfStatLinMod(mean(Dk(:,subfield_masks(:,i)>0),2),M);
+        slm  	= SurfStatT(slm,(GN.Affect-GN.Control1));
+        p = 2*(1 -tcdf(abs(slm.t),slm.df));
+        t_val(3,i,:) = slm.t;
+        p_val(3,i,:) = p;
+
+        slm     = SurfStatLinMod(mean(Dk(:,subfield_masks(:,i)>0),2),M);
+        slm  	= SurfStatT(slm,(GN.Perspective));
+        p = 2*(1 -tcdf(abs(slm.t),slm.df));
+        t_val(4,i,:) = slm.t;
+        p_val(4,i,:) = p;
+
+        slm     = SurfStatLinMod(mean(Dk(:,subfield_masks(:,i)>0),2),M);
+        slm  	= SurfStatT(slm,(GN.Affect));
+        p = 2*(1 -tcdf(abs(slm.t),slm.df));
+        t_val(5,i,:) = slm.t;
+        p_val(5,i,:) = p;
+
+        slm     = SurfStatLinMod(mean(Dk(:,subfield_masks(:,i)>0),2),M);
+        slm  	= SurfStatT(slm,(GN.Control1));
+        p = 2*(1 -tcdf(abs(slm.t),slm.df));
+        t_val(6,i,:) = slm.t;
+        p_val(6,i,:) = p;
+
+        %describtive statistics
+        keep_perspective = (find(strcmp(groupN(keep),'Perspective')))
+        keep_affect = (find(strcmp(groupN(keep),'Affect')))
+        keep_control   = (find(strcmp(groupN(keep),'Control1')))
+
+        xx= mean(Dk(keep_perspective,subfield_masks(:,i)>0),2);
+        meansdata(1,i) = mean(xx);
+        stddata(1,i) = std(xx);
+        SEM = std(xx)/sqrt(length(xx)); % Standard Error
+        ts = tinv([0.025  0.975],length(xx)-1);      % T-Score
+        cidata = mean(xx) + ts*SEM;
+        cidatamin(1,i) = cidata(1);
+        cidatamax(1,i) = cidata(2);
+
+        xx= mean(Dk(keep_affect,subfield_masks(:,i)>0),2);
+        meansdata(2,i) = mean(xx);
+        stddata(2,i) = std(xx);
+        SEM = std(xx)/sqrt(length(xx)); % Standard Error
+        ts = tinv([0.025  0.975],length(xx)-1);      % T-Score
+        cidata = mean(xx) + ts*SEM;
+        cidatamin(2,i) = cidata(1);
+        cidatamax(2,i) = cidata(2);
+
+        xx= mean(Dk(keep_control,subfield_masks(:,i)>0),2);
+        meansdata(3,i) = mean(xx);
+        stddata(3,i) = std(xx);
+        SEM = std(xx)/sqrt(length(xx)); % Standard Error
+        ts = tinv([0.025  0.975],length(xx)-1);      % T-Score
+        cidata = mean(xx) + ts*SEM;
+        cidatamin(3,i) = cidata(1);
+        cidatamax(3,i) = cidata(2);
+
+    end
+
+    descT1T3fc = [t_val(4,:,:);p_val(4,:,:);meansdata(1,:);stddata(1,:);cidatamin(1,:);cidatamax(1,:);...      
+       [0,0,0,0,0,0]; t_val(5,:,:); p_val(5,:,:); meansdata(2,:);stddata(2,:);cidatamin(2,:);cidatamax(2,:);...      
+       [0,0,0,0,0,0]; t_val(6,:,:); p_val(6,:,:); meansdata(3,:);stddata(3,:);cidatamin(3,:);cidatamax(3,:)];
+
+    csvwrite([figdir 'descriptives_T1_T3_FC.csv'], descT1T3fc)
+    
+    statsT1T3fc = [t_val(1,:,:);p_val(1,:,:);d_val(1,:,:);...      
+       [0,0,0,0,0,0]; t_val(3,:,:);p_val(3,:,:);d_val(3,:,:);...      
+       [0,0,0,0,0,0]; t_val(2,:,:);p_val(2,:,:);d_val(2,:,:)];
+
+    csvwrite([figdir 'stats_T1_T3_FC.csv'], statsT1T3fc)
+
+end
+
+% Descriptives T1-T2
+for Figure2 = 1
+    for i = 1:6
+        % keep the endpoints
+        Xn      = squeeze((FC_change(:,i,:)));
+        keep1   = union(find(strcmp(groupN,'Perspective')),find(strcmp(groupN,'Affect')));
+        keep1   = union(keep1,    find(strcmp(groupN,'Presence')));
+        keep1   = union(keep1,    find(strcmp(groupN,'Control1')));
+
+        % keep no data
+        keep2   = intersect(find(Xn(:,1) >-666), find(sum(Xn,2)~=0));
+
+        keep4   = find(tpnum ==2)
+        keep    = mintersect(keep1, keep2, keep4); %,
+        size(mintersect(keep, find(strcmp(groupN,'Affect')))) %
+        size(mintersect(keep, find(strcmp(groupN,'Perspective')))) %
+        size(mintersect(keep, find(strcmp(groupN,'Control1')))) %
+
+        Dk      = Xn(keep,:);
+        ik      = id(keep);
+        ink     = idnum(keep);
+        tk      = tpnum(keep);
+        tnk     = tp(keep);
+        gk      = group(keep);
+        g4k     = group4(keep);
+        gNk     = groupN(keep);
+        ak      = age(keep);
+        sk      = sex(keep);
+        A       = term(ak);
+        S       = term(sk);
+        G       = term(gk);
+        G4      = term(g4k);
+        GN      = term(gNk);
+        Sub     = term(ik);
+        T       = term(tnk);
+        Tn      = term(tk);
+
+        M     = 1  + A + S + GN + random(Sub)  + I;
+
+        slm     = SurfStatLinMod(mean(Dk(:,subfield_masks(:,i)>0),2),M);
+        slm  	= SurfStatT(slm,(GN.Affect-GN.Perspective));
+        p = 2*(1 -tcdf(abs(slm.t),slm.df));
+        t_val(1,i,:) = slm.t;
+        p_val(1,i,:) = p;
+        d_val(1,i,:)   = 2*(slm.t)./sqrt(slm.df)
+
+
+        slm     = SurfStatLinMod(mean(Dk(:,subfield_masks(:,i)>0),2),M);
+        slm  	= SurfStatT(slm,(GN.Perspective-GN.Control1));
+        p = 2*(1 -tcdf(abs(slm.t),slm.df));
+        t_val(2,i,:) = slm.t;
+        p_val(2,i,:) = p;
+
+        slm     = SurfStatLinMod(mean(Dk(:,subfield_masks(:,i)>0),2),M);
+        slm  	= SurfStatT(slm,(GN.Affect-GN.Control1));
+        p = 2*(1 -tcdf(abs(slm.t),slm.df));
+        t_val(3,i,:) = slm.t;
+        p_val(3,i,:) = p;
+ 
+    end
+
+      statsT1T3fc = [t_val(1,:,:);p_val(1,:,:);d_val(1,:,:);...
+            [0,0,0,0,0,0]; t_val(3,:,:);p_val(3,:,:);d_val(3,:,:);...
+            [0,0,0,0,0,0]; t_val(2,:,:);p_val(2,:,:);d_val(2,:,:)];
+
+        csvwrite([figdir 'stats_T1_T2_FC.csv'], statsT1T3fc)
+
+end
+
+% Descriptives T2-T3
+for Figure2 = 1
+    for i = 1:6
+        % keep the endpoints
+        Xn      = squeeze((FC_change(:,i,:)));
+        keep1   = union(find(strcmp(groupN,'Perspective')),find(strcmp(groupN,'Affect')));
+        keep1   = union(keep1,    find(strcmp(groupN,'Presence')));
+        keep1   = union(keep1,    find(strcmp(groupN,'Control1')));
+
+        % keep no data
+        keep2   = intersect(find(Xn(:,1) >-666), find(sum(Xn,2)~=0));
+
+        keep4   = find(tpnum ==3)
+        keep    = mintersect(keep1, keep2, keep4); %,
+        size(mintersect(keep, find(strcmp(groupN,'Affect')))) %
+        size(mintersect(keep, find(strcmp(groupN,'Perspective')))) %
+        size(mintersect(keep, find(strcmp(groupN,'Control1')))) %
+
+        Dk      = Xn(keep,:);
+        ik      = id(keep);
+        ink     = idnum(keep);
+        tk      = tpnum(keep);
+        tnk     = tp(keep);
+        gk      = group(keep);
+        g4k     = group4(keep);
+        gNk     = groupN(keep);
+        ak      = age(keep);
+        sk      = sex(keep);
+        A       = term(ak);
+        S       = term(sk);
+        G       = term(gk);
+        G4      = term(g4k);
+        GN      = term(gNk);
+        Sub     = term(ik);
+        T       = term(tnk);
+        Tn      = term(tk);
+
+        M     = 1  + A + S + GN + random(Sub)  + I;
+
+        slm     = SurfStatLinMod(mean(Dk(:,subfield_masks(:,i)>0),2),M);
+        slm  	= SurfStatT(slm,(GN.Affect-GN.Perspective));
+        p = 2*(1 -tcdf(abs(slm.t),slm.df));
+        t_val(1,i,:) = slm.t;
+        p_val(1,i,:) = p;
+        d_val(1,i,:)   = 2*(slm.t)./sqrt(slm.df)
+
+
+        slm     = SurfStatLinMod(mean(Dk(:,subfield_masks(:,i)>0),2),M);
+        slm  	= SurfStatT(slm,(GN.Perspective-GN.Control1));
+        p = 2*(1 -tcdf(abs(slm.t),slm.df));
+        t_val(2,i,:) = slm.t;
+        p_val(2,i,:) = p;
+
+        slm     = SurfStatLinMod(mean(Dk(:,subfield_masks(:,i)>0),2),M);
+        slm  	= SurfStatT(slm,(GN.Affect-GN.Control1));
+        p = 2*(1 -tcdf(abs(slm.t),slm.df));
+        t_val(3,i,:) = slm.t;
+        p_val(3,i,:) = p;
+ 
+    end
+
+      statsT1T3fc = [t_val(1,:,:);p_val(1,:,:);d_val(1,:,:);...
+            [0,0,0,0,0,0]; t_val(3,:,:);p_val(3,:,:);d_val(3,:,:);...
+            [0,0,0,0,0,0]; t_val(2,:,:);p_val(2,:,:);d_val(2,:,:)];
+
+        csvwrite([figdir 'stats_T2_T3_FC.csv'], statsT1T3fc)
+
+end
+
+% Descriptives T1-T3 group 1
+for Figure2 = 1
+    for i = 1:6
+        % keep the endpoints
+        Xn      = squeeze((FC_change(:,i,:)));
+        keep1   = union(find(strcmp(groupN,'Perspective')),find(strcmp(groupN,'Affect')));
+        keep1   = union(keep1,    find(strcmp(groupN,'Presence')));
+        keep1   = union(keep1,    find(strcmp(groupN,'Control1')));
+
+        % keep no data
+        keep2   = intersect(find(Xn(:,1) >-666), find(sum(Xn,2)~=0));
+
+        keep4   = find(strcmp(group4,'Group_1'));
+        keep    = mintersect(keep1, keep2, keep4); %,
+        size(mintersect(keep, find(strcmp(groupN,'Affect')))) %
+        size(mintersect(keep, find(strcmp(groupN,'Perspective')))) %
+        size(mintersect(keep, find(strcmp(groupN,'Control1')))) %
+
+        Dk      = Xn(keep,:);
+        ik      = id(keep);
+        ink     = idnum(keep);
+        tk      = tpnum(keep);
+        tnk     = tp(keep);
+        gk      = group(keep);
+        g4k     = group4(keep);
+        gNk     = groupN(keep);
+        ak      = age(keep);
+        sk      = sex(keep);
+        A       = term(ak);
+        S       = term(sk);
+        G       = term(gk);
+        G4      = term(g4k);
+        GN      = term(gNk);
+        Sub     = term(ik);
+        T       = term(tnk);
+        Tn      = term(tk);
+
+        M     = 1  + A + S + GN + random(Sub)  + I;
+
+        slm     = SurfStatLinMod(mean(Dk(:,subfield_masks(:,i)>0),2),M);
+        slm  	= SurfStatT(slm,(GN.Affect-GN.Perspective));
+        p = 2*(1 -tcdf(abs(slm.t),slm.df));
+        t_val(1,i,:) = slm.t;
+        p_val(1,i,:) = p;
+        d_val(1,i,:)   = 2*(slm.t)./sqrt(slm.df)
+
+    end
+
+      statsT1T3fc = [t_val(1,:,:);p_val(1,:,:);d_val(1,:,:)];
+
+        csvwrite([figdir 'stats_T1_T3_FC_TC1.csv'], statsT1T3fc)
+
+end
+
+% Descriptives T1-T3 group 2
+for Figure2 = 1
+    for i = 1:6
+        % keep the endpoints
+        Xn      = squeeze((FC_change(:,i,:)));
+        keep1   = union(find(strcmp(groupN,'Perspective')),find(strcmp(groupN,'Affect')));
+        keep1   = union(keep1,    find(strcmp(groupN,'Presence')));
+        keep1   = union(keep1,    find(strcmp(groupN,'Control1')));
+
+        % keep no data
+        keep2   = intersect(find(Xn(:,1) >-666), find(sum(Xn,2)~=0));
+
+        keep4   = find(strcmp(group4,'Group_2'));
+        keep    = mintersect(keep1, keep2, keep4); %,
+        size(mintersect(keep, find(strcmp(groupN,'Affect')))) %
+        size(mintersect(keep, find(strcmp(groupN,'Perspective')))) %
+        size(mintersect(keep, find(strcmp(groupN,'Control1')))) %
+
+        Dk      = Xn(keep,:);
+        ik      = id(keep);
+        ink     = idnum(keep);
+        tk      = tpnum(keep);
+        tnk     = tp(keep);
+        gk      = group(keep);
+        g4k     = group4(keep);
+        gNk     = groupN(keep);
+        ak      = age(keep);
+        sk      = sex(keep);
+        A       = term(ak);
+        S       = term(sk);
+        G       = term(gk);
+        G4      = term(g4k);
+        GN      = term(gNk);
+        Sub     = term(ik);
+        T       = term(tnk);
+        Tn      = term(tk);
+
+        M     = 1  + A + S + GN + random(Sub)  + I;
+
+        slm     = SurfStatLinMod(mean(Dk(:,subfield_masks(:,i)>0),2),M);
+        slm  	= SurfStatT(slm,(GN.Affect-GN.Perspective));
+        p = 2*(1 -tcdf(abs(slm.t),slm.df));
+        t_val(1,i,:) = slm.t;
+        p_val(1,i,:) = p;
+        d_val(1,i,:)   = 2*(slm.t)./sqrt(slm.df)
+
+    end
+
+      statsT1T3fc = [t_val(1,:,:);p_val(1,:,:);d_val(1,:,:)];
+
+        csvwrite([figdir 'stats_T1_T3_FC_TC2.csv'], statsT1T3fc)
+
+end
+
+%left CA T0:T1
+for Figure2 = 1
+    for i = 1:3
+        % keep the endpoints
+        Xn      = squeeze((FC_change(:,i,:)));
+        keep1   = union(find(strcmp(groupN,'Perspective')),find(strcmp(groupN,'Affect')));
+        keep1   = union(keep1,    find(strcmp(groupN,'Presence')));
+        keep1   = union(keep1,    find(strcmp(groupN,'Control1')));
+
+        % keep no data
+        keep2   = intersect(find(Xn(:,1) >-666), find(sum(Xn,2)~=0));
+
+        keep4   = find(tpnum ==1)
+        keep    = mintersect(keep1, keep2, keep4); %,
+
+        Dk      = Xn(keep,:);
+        ik      = id(keep);
+        ink     = idnum(keep);
+        tk      = tpnum(keep);
+        tnk     = tp(keep);
+        gk      = group(keep);
+        g4k     = group4(keep);
+        gNk     = groupN(keep);
+        ak      = age(keep);
+        sk      = sex(keep);
+        A       = term(ak);
+        S       = term(sk);
+        G       = term(gk);
+        G4      = term(g4k);
+        GN      = term(gNk);
+        Sub     = term(ik);
+        T       = term(tnk);
+        Tn      = term(tk);
+
+        meanCk  = mean(Dk,2);
+        M     = 1  + A + S + GN + random(Sub)  + I;
+
+        for ap = 1
+            slm     = SurfStatLinMod(Dk,M);
+            slm  	= SurfStatT(slm,(GN.Afffect-GN.Presence))
+            p   = 2*(1 - tcdf(abs(slm.t), slm.df));
+
+
+
+            hp = fdr_bh(p(subfield_masks(:,2)>0),0.05)
+            map2fs5 = zeros(20484,1);
+            sign_m = zeros(400,1);
+            sign_m(subfield_masks(:,i)>0) = hp;
+            for  k = 1:400
+                map2fs5(yeo400_fsa5==k)  = sign_m(k).*slm.t(k);
+            end
+            %
+            f=figure,
+            BoSurfStatViewData(map2fs5,SN,'')
+            colormap(flipud(cbrewer('div','RdBu',11)))
+            SurfStatColLim([-4 4])
+            print(f, fullfile([figdir, num2str(i),'_volume_left_PrA.FDR.png']), '-dpng');
+        end
+
+        for ac = 1
+            slm     = SurfStatLinMod(Dk,M);
+            slm  	= SurfStatT(slm,(GN.Affect-GN.Control1))
+            p   = 2*(1 - tcdf(abs(slm.t), slm.df));
+
+
+            hp = fdr_bh(p(subfield_masks(:,2)>0),0.05)
+            map2fs5 = zeros(20484,1);
+            sign_m = zeros(400,1);
+            sign_m(subfield_masks(:,i)>0) = hp;
+            for  k = 1:400
+                map2fs5(yeo400_fsa5==k)  = sign_m(k).*slm.t(k);
+            end
+            %
+            f=figure,
+            BoSurfStatViewData(map2fs5,SN,'')
+            colormap(flipud(cbrewer('div','RdBu',11)))
+            SurfStatColLim([-4 4])
+            print(f, fullfile([figdir, num2str(i),'_volume_left_AT3C.FDR.png']), '-dpng');
+        end
+
+        for pc = 1
+            slm     = SurfStatLinMod(Dk,M);
+            slm  	= SurfStatT(slm,(GN.Presence-GN.Control1))
+            p   = 2*(1 - tcdf(abs(slm.t), slm.df));
+
+            hp = fdr_bh(p(subfield_masks(:,5)>0),0.05)
+            map2fs5 = zeros(20484,1);
+            sign_m = zeros(400,1);
+            sign_m(subfield_masks(:,i)>0) = hp;
+            for  k = 1:400
+                map2fs5(yeo400_fsa5==k)  = sign_m(k).*slm.t(k);
+            end
+            %
+            f=figure,
+            BoSurfStatViewData(map2fs5,SN,'')
+            colormap(flipud(cbrewer('div','RdBu',11)))
+            SurfStatColLim([-4 4])
+            print(f, fullfile([figdir, num2str(i),'_volume_left_PrC.FDR.png']), '-dpng');
+        end
+
+    end
+end
+
+%left CA T1:T3
+for Figure2 = 1
+    for i = 1:3
+        % keep the endpoints
+        Xn      = squeeze((FC_change(:,i,:)));
+        keep1   = union(find(strcmp(groupN,'Perspective')),find(strcmp(groupN,'Affect')));
+        keep1   = union(keep1,    find(strcmp(groupN,'Presence')));
+        keep1   = union(keep1,    find(strcmp(groupN,'Control1')));
+
+        % keep no data
+        keep2   = intersect(find(Xn(:,1) >-666), find(sum(Xn,2)~=0));
+
+        keep4   = find(tpnum >1)
+        keep3   = find((~strcmp(group4,'Group3')))
+        keep    = mintersect(keep1, keep2, keep4, keep3); %,
+
+        Dk      = Xn(keep,:);
+        ik      = id(keep);
+        ink     = idnum(keep);
+        tk      = tpnum(keep);
+        tnk     = tp(keep);
+        gk      = group(keep);
+        g4k     = group4(keep);
+        gNk     = groupN(keep);
+        ak      = age(keep);
+        sk      = sex(keep);
+        A       = term(ak);
+        S       = term(sk);
+        G       = term(gk);
+        G4      = term(g4k);
+        GN      = term(gNk);
+        Sub     = term(ik);
+        T       = term(tnk);
+        Tn      = term(tk);
+
+        meanCk  = mean(Dk,2);
+        M     = 1  + A + S + GN + random(Sub)  + I;
+
+        for ap = 1
+            slm     = SurfStatLinMod(Dk,M);
+            slm  	= SurfStatT(slm,(GN.Affect-GN.Perspective))
+            p   = 2*(1 - tcdf(abs(slm.t), slm.df));
+            d = 2*(slm.t)./sqrt(slm.df)
+
+            %             for  k = 1:400
+            %                 map2fs5(yeo400_fsa5==k)  = (subfield_masks(k,i)>0).*slm.t(k);%.*((p(k)<0.01));
+            %             end
+            %
+            %             f=figure,
+            %             BoSurfStatViewData(map2fs5,SN,'')
+            %             colormap(flipud(cbrewer('div','RdBu',11)))
+            %             SurfStatColLim([-4 4])
+            %             print(f, fullfile([figdir, num2str(i),'_volume_left_APp.png']), '-dpng');
+            %
+
+            hp = fdr_bh(p(subfield_masks(:,i)>0),0.05)
+            map2fs5 = zeros(20484,1);
+            sign_m = zeros(400,1);
+            sign_m(subfield_masks(:,i)>0) = hp;
+            for  k = 1:400
+                map2fs5(yeo400_fsa5==k)  = sign_m(k).*slm.t(k);
+            end
+            %
+            f=figure,
+            BoSurfStatViewData(map2fs5,SN,'')
+            colormap(flipud(cbrewer('div','RdBu',11)))
+            SurfStatColLim([-4 4])
+            print(f, fullfile([figdir, num2str(i),'_volume_left_AP.FDR.png']), '-dpng');
+        end
+
+        for ac = 1
+            slm     = SurfStatLinMod(Dk,M);
+            slm  	= SurfStatT(slm,(GN.Affect-GN.Control1))
+            p   = 2*(1 - tcdf(abs(slm.t), slm.df));
+
+            %             for  k = 1:400
+            %                 map2fs5(yeo400_fsa5==k)  = (subfield_masks(k,i)>0).*slm.t(k);
+            %             end
+            %
+            %             f=figure,
+            %             BoSurfStatViewData(map2fs5,SN,'')
+            %             colormap(flipud(cbrewer('div','RdBu',11)))
+            %             SurfStatColLim([-4 4])
+            %             print(f, fullfile([figdir, num2str(i),'_volume_left_ACp.png']), '-dpng');
+
+
+            hp = fdr_bh(p(subfield_masks(:,i)>0),0.05)
+            map2fs5 = zeros(20484,1);
+            sign_m = zeros(400,1);
+            sign_m(subfield_masks(:,i)>0) = hp;
+            for  k = 1:400
+                map2fs5(yeo400_fsa5==k)  = sign_m(k).*slm.t(k);
+            end
+            %
+            f=figure,
+            BoSurfStatViewData(map2fs5,SN,'')
+            colormap(flipud(cbrewer('div','RdBu',11)))
+            SurfStatColLim([-4 4])
+            print(f, fullfile([figdir, num2str(i),'_volume_left_AC.FDR.png']), '-dpng');
+        end
+
+        for pc = 1
+            slm     = SurfStatLinMod(Dk,M);
+            slm  	= SurfStatT(slm,(GN.Perspective-GN.Control1))
+            p   = 2*(1 - tcdf(abs(slm.t), slm.df));
+
+            %             for  k = 1:400
+            %                 map2fs5(yeo400_fsa5==k)  = (subfield_masks(k,i)>0).*slm.t(k);
+            %             end
+            %
+            %             f=figure,
+            %             BoSurfStatViewData(map2fs5,SN,'')
+            %             colormap(flipud(cbrewer('div','RdBu',11)))
+            %             SurfStatColLim([-4 4])
+            %             print(f, fullfile([figdir, num2str(i),'_volume_left_PCp.png']), '-dpng');
+            %
+            %
+            hp = fdr_bh(p(subfield_masks(:,i)>0),0.05)
+            map2fs5 = zeros(20484,1);
+            sign_m = zeros(400,1);
+            sign_m(subfield_masks(:,i)>0) = hp;
+            for  k = 1:400
+                map2fs5(yeo400_fsa5==k)  = sign_m(k).*slm.t(k);
+            end
+            %
+            f=figure,
+            BoSurfStatViewData(map2fs5,SN,'')
+            colormap(flipud(cbrewer('div','RdBu',11)))
+            SurfStatColLim([-4 4])
+            print(f, fullfile([figdir, num2str(i),'_volume_left_PC.FDR.png']), '-dpng');
+        end
+
+    end
+end
+
+%right CA T0>T1
+for Figure2 = 1
+    for i = 4:6
+        % keep the endpoints
+        Xn      = squeeze((FC_change(:,i,:)));
+        keep1   = union(find(strcmp(groupN,'Perspective')),find(strcmp(groupN,'Affect')));
+        keep1   = union(keep1,    find(strcmp(groupN,'Presence')));
+        keep1   = union(keep1,    find(strcmp(groupN,'Control1')));
+
+        % keep no data
+        keep2   = intersect(find(Xn(:,1) >-666), find(sum(Xn,2)~=0));
+
+        keep4   = find(tpnum ==1)
+        keep    = mintersect(keep1, keep2, keep4); %,
+
+        Dk      = Xn(keep,:);
+        ik      = id(keep);
+        ink     = idnum(keep);
+        tk      = tpnum(keep);
+        tnk     = tp(keep);
+        gk      = group(keep);
+        g4k     = group4(keep);
+        gNk     = groupN(keep);
+        ak      = age(keep);
+        sk      = sex(keep);
+        A       = term(ak);
+        S       = term(sk);
+        G       = term(gk);
+        G4      = term(g4k);
+        GN      = term(gNk);
+        Sub     = term(ik);
+        T       = term(tnk);
+        Tn      = term(tk);
+
+        meanCk  = mean(Dk,2);
+        M     = 1  + A + S + GN + random(Sub)  + I;
+
+        for ap = 1
+            slm     = SurfStatLinMod(Dk,M);
+            slm  	= SurfStatT(slm,(GN.Affect-GN.Presence))
+            p   = 2*(1 - tcdf(abs(slm.t), slm.df));
+            d = 2*(slm.t)./sqrt(slm.df)
+
+            %             for  k = 1:400
+            %                 map2fs5(yeo400_fsa5==k)  = slm.t(k);%.*((p(k)<0.01));
+            %             end
+            %
+            %             f=figure,
+            %             BoSurfStatViewData(map2fs5,SM,'')
+            %             colormap(flipud(cbrewer('div','RdBu',11)))
+            %             SurfStatColLim([-4 4])
+            %             print(f, fullfile([figdir, num2str(i),'_volume_right_APp.png']), '-dpng');
+            %
+
+            hp = fdr_bh(p(subfield_masks(:,i)>0),0.05)
+            map2fs5 = zeros(20484,1);
+            sign_m = zeros(400,1);
+            sign_m(subfield_masks(:,i)>0) = hp;
+            for  k = 1:400
+                map2fs5(yeo400_fsa5==k)  = sign_m(k).*slm.t(k);
+            end
+            %
+            f=figure,
+            BoSurfStatViewData(map2fs5,SM,'')
+            colormap(flipud(cbrewer('div','RdBu',11)))
+            SurfStatColLim([-4 4])
+            print(f, fullfile([figdir, num2str(i),'_volume_right_APr.FDR.png']), '-dpng');
+        end
+
+        for ac = 1
+            slm     = SurfStatLinMod(Dk,M);
+            slm  	= SurfStatT(slm,(GN.Affect-GN.Control1))
+            p   = 2*(1 - tcdf(abs(slm.t), slm.df));
+
+            %             for  k = 1:400
+            %                 map2fs5(yeo400_fsa5==k)  = (subfield_masks(k,5)>0).*slm.t(k);%.*((p(k)<0.01));
+            %             end
+            %
+            %             f=figure,
+            %             BoSurfStatViewData(map2fs5,SN,'')
+            %             colormap(flipud(cbrewer('div','RdBu',11)))
+            %             SurfStatColLim([-4 4])
+            %             print(f, fullfile([figdir, num2str(i),'_volume_right_ACp.png']), '-dpng');
+            %
+
+            hp = fdr_bh(p(subfield_masks(:,i)>0),0.05)
+            map2fs5 = zeros(20484,1);
+            sign_m = zeros(400,1);
+            sign_m(subfield_masks(:,i)>0) = hp;
+            for  k = 1:400
+                map2fs5(yeo400_fsa5==k)  = sign_m(k).*slm.t(k);
+            end
+            %
+            f=figure,
+            BoSurfStatViewData(map2fs5,SM,'')
+            colormap(flipud(cbrewer('div','RdBu',11)))
+            SurfStatColLim([-4 4])
+            print(f, fullfile([figdir, num2str(i),'_volume_right_A3C.FDR.png']), '-dpng');
+        end
+
+        for pc = 1
+            slm     = SurfStatLinMod(Dk,M);
+            slm  	= SurfStatT(slm,(GN.Presence-GN.Control1))
+            p   = 2*(1 - tcdf(abs(slm.t), slm.df));
+            %
+            %             for  k = 1:400
+            %                 map2fs5(yeo400_fsa5==k)  = (subfield_masks(k,5)>0).*slm.t(k);%.*((p(k)<0.01));
+            %             end
+            %
+            %             f=figure,
+            %             BoSurfStatViewData(map2fs5,SN,'')
+            %             colormap(flipud(cbrewer('div','RdBu',11)))
+            %             SurfStatColLim([-4 4])
+            %             print(f, fullfile([figdir, num2str(i),'_volume_right_PCp.png']), '-dpng');
+            %
+
+            hp = fdr_bh(p(subfield_masks(:,i)>0),0.05)
+            map2fs5 = zeros(20484,1);
+            sign_m = zeros(400,1);
+            sign_m(subfield_masks(:,i)>0) = hp;
+            for  k = 1:400
+                map2fs5(yeo400_fsa5==k)  = sign_m(k).*slm.t(k);
+            end
+            %
+            f=figure,
+            BoSurfStatViewData(map2fs5,SM,'')
+            colormap(flipud(cbrewer('div','RdBu',11)))
+            SurfStatColLim([-4 4])
+            print(f, fullfile([figdir, num2str(i),'_volume_right_PrC.FDR.png']), '-dpng');
+        end
+
+
+    end
+end
+
+%right CA T1:T3
+for Figure2 = 1
+    for i = 4:6
+        % keep the endpoints
+        Xn      = squeeze((FC_change(:,i,:)));
+        keep1   = union(find(strcmp(groupN,'Perspective')),find(strcmp(groupN,'Affect')));
+        keep1   = union(keep1,    find(strcmp(groupN,'Presence')));
+        keep1   = union(keep1,    find(strcmp(groupN,'Control1')));
+
+        % keep no data
+        keep2   = intersect(find(Xn(:,1) >-666), find(sum(Xn,2)~=0));
+
+        keep4   = find(tpnum >1)
+        keep3   = find(~(strcmp(group4,'Group3')))
+        keep    = mintersect(keep1, keep2, keep4, keep3); %,
+
+        Dk      = Xn(keep,:);
+        ik      = id(keep);
+        ink     = idnum(keep);
+        tk      = tpnum(keep);
+        tnk     = tp(keep);
+        gk      = group(keep);
+        g4k     = group4(keep);
+        gNk     = groupN(keep);
+        ak      = age(keep);
+        sk      = sex(keep);
+        A       = term(ak);
+        S       = term(sk);
+        G       = term(gk);
+        G4      = term(g4k);
+        GN      = term(gNk);
+        Sub     = term(ik);
+        T       = term(tnk);
+
+        M     = 1  + A + S + GN + random(Sub)  + I;
+
+        for ap = 1
+            slm     = SurfStatLinMod(Dk,M);
+            slm  	= SurfStatT(slm,(GN.Affect-GN.Perspective))
+            p   = 2*(1 - tcdf(abs(slm.t), slm.df));
+            d = 2*(slm.t)./sqrt(slm.df)
+
+            %             for  k = 1:400
+            %                 map2fs5(yeo400_fsa5==k)  = slm.t(k);%.*((p(k)<0.01));
+            %             end
+            %
+            %             f=figure,
+            %             BoSurfStatViewData(map2fs5,SM,'')
+            %             colormap(flipud(cbrewer('div','RdBu',11)))
+            %             SurfStatColLim([-4 4])
+            %             print(f, fullfile([figdir, num2str(i),'_volume_right_APp.png']), '-dpng');
+            %
+
+            hp = fdr_bh(p(subfield_masks(:,i)>0),0.05)
+            map2fs5 = zeros(20484,1);
+            sign_m = zeros(400,1);
+            sign_m(subfield_masks(:,i)>0) = hp;
+            for  k = 1:400
+                map2fs5(yeo400_fsa5==k)  = sign_m(k).*slm.t(k);
+            end
+            %
+            f=figure,
+            BoSurfStatViewData(map2fs5,SM,'')
+            colormap(flipud(cbrewer('div','RdBu',11)))
+            SurfStatColLim([-4 4])
+            print(f, fullfile([figdir, num2str(i),'_volume_right_AP.FDR.png']), '-dpng');
+        end
+
+        for ac = 1
+            slm     = SurfStatLinMod(Dk,M);
+            slm  	= SurfStatT(slm,(GN.Affect-GN.Control1))
+            p   = 2*(1 - tcdf(abs(slm.t), slm.df));
+
+            %             for  k = 1:400
+            %                 map2fs5(yeo400_fsa5==k)  = (subfield_masks(k,5)>0).*slm.t(k);%.*((p(k)<0.01));
+            %             end
+            %
+            %             f=figure,
+            %             BoSurfStatViewData(map2fs5,SN,'')
+            %             colormap(flipud(cbrewer('div','RdBu',11)))
+            %             SurfStatColLim([-4 4])
+            %             print(f, fullfile([figdir, num2str(i),'_volume_right_ACp.png']), '-dpng');
+            %
+
+            hp = fdr_bh(p(subfield_masks(:,i)>0),0.05)
+            map2fs5 = zeros(20484,1);
+            sign_m = zeros(400,1);
+            sign_m(subfield_masks(:,i)>0) = hp;
+            for  k = 1:400
+                map2fs5(yeo400_fsa5==k)  = sign_m(k).*slm.t(k);
+            end
+            %
+            f=figure,
+            BoSurfStatViewData(map2fs5,SM,'')
+            colormap(flipud(cbrewer('div','RdBu',11)))
+            SurfStatColLim([-4 4])
+            print(f, fullfile([figdir, num2str(i),'_volume_right_AC.FDR.png']), '-dpng');
+        end
+
+        for pc = 1
+            slm     = SurfStatLinMod(Dk,M);
+            slm  	= SurfStatT(slm,(GN.Perspective-GN.Control1))
+            p   = 2*(1 - tcdf(abs(slm.t), slm.df));
+            %
+            %             for  k = 1:400
+            %                 map2fs5(yeo400_fsa5==k)  = (subfield_masks(k,5)>0).*slm.t(k);%.*((p(k)<0.01));
+            %             end
+            %
+            %             f=figure,
+            %             BoSurfStatViewData(map2fs5,SN,'')
+            %             colormap(flipud(cbrewer('div','RdBu',11)))
+            %             SurfStatColLim([-4 4])
+            %             print(f, fullfile([figdir, num2str(i),'_volume_right_PCp.png']), '-dpng');
+            %
+
+            hp = fdr_bh(p(subfield_masks(:,i)>0),0.05)
+            map2fs5 = zeros(20484,1);
+            sign_m = zeros(400,1);
+            sign_m(subfield_masks(:,i)>0) = hp;
+            for  k = 1:400
+                map2fs5(yeo400_fsa5==k)  = sign_m(k).*slm.t(k);
+            end
+            %
+            f=figure,
+            BoSurfStatViewData(map2fs5,SM,'')
+            colormap(flipud(cbrewer('div','RdBu',11)))
+            SurfStatColLim([-4 4])
+            print(f, fullfile([figdir, num2str(i),'_volume_right_PC.FDR.png']), '-dpng');
+        end
+
+    end
+end
+
+%relationship with the car
+for CARxhipp = 1
+    for kk =  1:6
+        for k= 1:3
+            Xn =  mean(squeeze(mean(FC_change(:,kk,:),2)),2);
+            Xn(isnan(Xn)) = 0;
+            keep2   = intersect(find(Xn(:,1) >-666), find(sum(Xn,2)~=0));
+            keep1   = find(strcmp(groupN,'Affect'));
+            keep4   = find((~strcmp(group4,'Group3')));
+            keep6   = find(abs((carChange_last(:,k)))~=0);
+            keep7   = find(abs((carChange_last(:,k)))~=666);
+            keep    = mintersect(keep1,keep2,keep4, keep6, keep7);
+
+            size(keep)
+            size(mintersect(keep, find(strcmp(groupN,'Affect')))) % N = 184
+            size(intersect(keep,find(strcmp(sex,'female'))))
+            mean(age(keep))
+            std(age(keep))
+            min(age(keep))
+            max(age(keep))
+            size(find(strcmp(group4(keep),'Group_1')& (strcmp(groupN(keep),'Affect'))))
+            size(find(strcmp(group4(keep),'Group_2')& (strcmp(groupN(keep),'Affect'))))
+            %size(find(strcmp(group4(keep),'Group3')& (strcmp(groupN(keep),'Affect'))))
+
+            Ck      = mean(squeeze((FC_change(keep,kk,subfield_masks(:,kk)>0))),2);
+
+            ik      = id(keep,:);
+            ink     = idnum(keep);
+            tk      = tpnum(keep,:);
+            tnk     = tp(keep,:);
+            gk      = group(keep);
+            g4k     = group4(keep);
+            gNk     = groupN(keep);
+            ak      = age(keep);
+            sk      = sex(keep);
+            Compk   = carChange_last(keep,k);
+            A       = term(ak);
+            S       = term(sk);
+            G       = term(gk);
+            G4      = term(g4k);
+            GN      = term(gNk);
+            Sub     = term(ik);
+            CMP     = term(Compk);
+            T       = term(tk);
+            Tn      = term(tnk);
+
+            M        = 1 + A + S + CMP  + random(Sub) + I;
+
+            slm     = SurfStatLinMod(Ck,M);
+            slm  	= SurfStatT(slm,(Compk));
+
+            p =  2*(1 - tcdf(abs(slm.t),slm.df));
+
+            stress_hipp(k,kk)   = slm.t;
+            stress_hippr(k,kk)  = sqrt(slm.t.^2 / (slm.t.^2 + slm.df)).*sign(slm.t);
+            stress_p(k,kk) = p;
+
+            if( p <= 0.05)
+                f = figure,
+                scatter(Compk,(Ck),'filled','k'),lsline
+                print(f, [figdir, 'F3.function',num2str(kk),'.stress',num2str(k),'.png'], '-dpng');
+                close(f);
+            end
+
+            if( kk ==2 || kk == 5 )
+                Ck      = (squeeze((FC_change(keep,kk,34))));
+                slm     = SurfStatLinMod(Ck,M);
+                slm  	= SurfStatT(slm,(Compk));
+
+                p =  2*(1 - tcdf(abs(slm.t),slm.df));
+
+                stress_hippPI(k,kk)   = slm.t;
+                stress_hipprPI(k,kk)  = sqrt(slm.t.^2 / (slm.t.^2 + slm.df)).*sign(slm.t);
+                stress_pPI(k,kk) = p;
+            end
+
+            if( kk ==2 || kk == 5 )
+                Ck      = (squeeze((FC_change(keep,kk,382))));
+                slm     = SurfStatLinMod(Ck,M);
+                slm  	= SurfStatT(slm,(Compk));
+
+                p =  2*(1 - tcdf(abs(slm.t),slm.df));
+
+                stress_hippPFC(k,kk)   = slm.t;
+                stress_hipprPFC(k,kk)  = sqrt(slm.t.^2 / (slm.t.^2 + slm.df)).*sign(slm.t);
+                stress_pPFC(k,kk) = p;
+
+
+            end
+
+            if( kk ==2 || kk == 5 )
+                slm     = SurfStatLinMod((squeeze(FC_change(keep,kk,:))),M);
+                slm     = SurfStatT(slm,Compk);
+                p =  2*(1 - tcdf(abs(slm.t),slm.df));
+                h = fdr_bh(p(subfield_masks(:,kk)>0),0.05);
+                tmp = ones(400,1);
+                tmp_h = zeros(400,1);
+                tmp_h(subfield_masks(:,kk)>0) = h;
+                map2fs5 = zeros(20484,1);
+                for  jj = 1:400
+                    map2fs5(yeo400_fsa5==jj)  = slm.t(jj).*(tmp_h(jj));
+                end
+
+                f=figure,
+                BoSurfStatViewData(map2fs5,SM,'')
+                colormap(flipud(cbrewer('div','RdBu',11)))
+                BoSurfStatColLim([-3 3])
+                print(f, fullfile(['FC_linmodel_vol',num2str(kk),'_stress',num2str(k),'tfdr.png']), '-dpng');
+
+                if( max(tmp_h) > 0.05)
+                    f = figure,
+                    scatter(Compk,mean(squeeze(FC_change(keep,kk,tmp_h>0)),2),'filled','k'),lsline
+                    print(f, [figdir, 'F3.functionROI',num2str(kk),'.stress',num2str(k),'.png'], '-dpng');
+                    close(f);
+                end
+            end
+        end
+
+
+    end
+
+    stress_func = [stress_hipp(1,:);stress_p(1,:);stress_hipp(2,:);stress_p(2,:);...
+        stress_hipp(3,:);stress_p(3,:)];
+
+    csvwrite([figdir 'stress_func.csv'], stress_func)
+
+
+end
+
+    %relationship with the hair
+    for CARxhipp = 1
+        for kk =  1:6
+            for k= 1:3
+                Xn =  mean(squeeze(mean(FC_change(:,kk,:),2)),2);
+                Xn(isnan(Xn)) = 0;
+                keep2   = intersect(find(Xn(:,1) >-666), find(sum(Xn,2)~=0));
+                keep1   = find(strcmp(groupN,'Affect'));
+                keep4   = find((~strcmp(group4,'Group3')));
+                keep6   = find(abs((hairChange_last(:,k)))~=0);
+                keep7   = find(abs((hairChange_last(:,k)))~=666);
+                keep    = mintersect(keep1,keep2,keep4, keep6, keep7);
+
+                size(keep)
+                size(mintersect(keep, find(strcmp(groupN,'Affect')))) % N = 184
+                size(intersect(keep,find(strcmp(sex,'female'))))
+                mean(age(keep))
+                std(age(keep))
+                min(age(keep))
+                max(age(keep))
+                size(find(strcmp(group4(keep),'Group_1')& (strcmp(groupN(keep),'Affect'))))
+                size(find(strcmp(group4(keep),'Group_2')& (strcmp(groupN(keep),'Affect'))))
+                %size(find(strcmp(group4(keep),'Group3')& (strcmp(groupN(keep),'Affect'))))
+
+                Ck      = mean(squeeze((FC_change(keep,kk,subfield_masks(:,kk)>0))),2);
+
+                ik      = id(keep,:);
+                ink     = idnum(keep);
+                tk      = tpnum(keep,:);
+                tnk     = tp(keep,:);
+                gk      = group(keep);
+                g4k     = group4(keep);
+                gNk     = groupN(keep);
+                ak      = age(keep);
+                sk      = sex(keep);
+                Compk   = hairChange_last(keep,k);
+                A       = term(ak);
+                S       = term(sk);
+                G       = term(gk);
+                G4      = term(g4k);
+                GN      = term(gNk);
+                Sub     = term(ik);
+                CMP     = term(Compk);
+                T       = term(tk);
+                Tn      = term(tnk);
+
+                M        = 1 + A + S + CMP  + random(Sub) + I;
+
+                slm     = SurfStatLinMod(Ck,M);
+                slm  	= SurfStatT(slm,(Compk));
+
+                p =  2*(1 - tcdf(abs(slm.t),slm.df));
+
+                stress_hipp(k,kk)   = slm.t;
+                stress_r(k,kk)  = sqrt(slm.t.^2 / (slm.t.^2 + slm.df)).*sign(slm.t);
+                stress_p(k,kk) = p;
+
+                if( kk ==2 || kk == 5 )
+                    Ck      = (squeeze((FC_change(keep,kk,34))));
+                    slm     = SurfStatLinMod(Ck,M);
+                    slm  	= SurfStatT(slm,(Compk));
+
+                    p =  2*(1 - tcdf(abs(slm.t),slm.df));
+
+                    stress_hippPI(k,kk)   = slm.t;
+                    stress_hipprPI(k,kk)  = sqrt(slm.t.^2 / (slm.t.^2 + slm.df)).*sign(slm.t);
+                    stress_pPI(k,kk) = p;
+                end
+
+                if( kk ==2 || kk == 5 )
+                    Ck      = (squeeze((FC_change(keep,kk,382))));
+                    slm     = SurfStatLinMod(Ck,M);
+                    slm  	= SurfStatT(slm,(Compk));
+
+                    p =  2*(1 - tcdf(abs(slm.t),slm.df));
+
+                    stress_hippPFC(k,kk)   = slm.t;
+                    stress_hipprPFC(k,kk)  = sqrt(slm.t.^2 / (slm.t.^2 + slm.df)).*sign(slm.t);
+                    stress_pPFC(k,kk) = p;
+
+
+                end
+
+
+            end
+
+
+        end
+      
+         stress_func = [stress_hipp(1,:);stress_p(1,:);stress_hipp(2,:);stress_p(2,:);...
+            stress_hipp(3,:);stress_p(3,:)];
+
+        csvwrite([figdir 'hair_func.csv'], stress_func)
+
+
+    end
+
+    %relationship overall
+    for CARxhipp = 1
+        for kk =  1:6
+            for k= 1:3
+                Xn =  mean(squeeze(mean(FC_change(:,kk,:),2)),2);
+                Xn(isnan(Xn)) = 0;
+                keep2   = intersect(find(Xn(:,1) >-666), find(sum(Xn,2)~=0));
+                keep1   = union(find(strcmp(groupN,'Perspective')),find(strcmp(groupN,'Affect')));
+                keep1   = union(keep1,    find(strcmp(groupN,'Presence')));
+                keep4   = find((~strcmp(group4,'Group3')));
+
+                keep6   = find(abs((carChange_last(:,k)))~=0);
+                keep7   = find(abs((carChange_last(:,k)))~=666);
+                keep    = mintersect(keep1,keep2,keep4, keep6, keep7);
+
+                size(keep)
+                size(mintersect(keep, find(strcmp(groupN,'Affect')))) % N = 184
+                size(intersect(keep,find(strcmp(sex,'female'))))
+                mean(age(keep))
+                std(age(keep))
+                min(age(keep))
+                max(age(keep))
+                size(find(strcmp(group4(keep),'Group_1')& (strcmp(groupN(keep),'Affect'))))
+                size(find(strcmp(group4(keep),'Group_2')& (strcmp(groupN(keep),'Affect'))))
+                %size(find(strcmp(group4(keep),'Group3')& (strcmp(groupN(keep),'Affect'))))
+
+                Ck      = mean(squeeze((FC_change(keep,kk,subfield_masks(:,kk)>0))),2);
+
+                ik      = id(keep,:);
+                ink     = idnum(keep);
+                tk      = tpnum(keep,:);
+                tnk     = tp(keep,:);
+                gk      = group(keep);
+                g4k     = group4(keep);
+                gNk     = groupN(keep);
+                ak      = age(keep);
+                sk      = sex(keep);
+                Compk   = carChange_last(keep,k);
+                A       = term(ak);
+                S       = term(sk);
+                G       = term(gk);
+                G4      = term(g4k);
+                GN      = term(gNk);
+                Sub     = term(ik);
+                CMP     = term(Compk);
+                T       = term(tk);
+                Tn      = term(tnk);
+
+                M        = 1 + A + S + CMP  + random(Sub) + I;
+
+                slm     = SurfStatLinMod(Ck,M);
+                slm  	= SurfStatT(slm,(Compk));
+
+                p =  2*(1 - tcdf(abs(slm.t),slm.df));
+
+                stress_hipp(k,kk)   = slm.t;
+                stress_r(k,kk)  = sqrt(slm.t.^2 / (slm.t.^2 + slm.df)).*sign(slm.t);
+                stress_p(k,kk) = p;
+
+            end
+
+        end
+        
+        stress_func = [stress_hipp(1,:);stress_p(1,:);stress_hipp(2,:);stress_p(2,:);...
+            stress_hipp(3,:);stress_p(3,:)];
+
+        csvwrite([figdir 'stress_func_all.csv'], stress_func)
+
+
+    end
+
+    %relationship with the hair
+    for CARxhipp = 1
+        for kk =  1:6
+            for k= 1:3
+                Xn =  mean(squeeze(mean(FC_change(:,kk,:),2)),2);
+                Xn(isnan(Xn)) = 0;
+                keep2   = intersect(find(Xn(:,1) >-666), find(sum(Xn,2)~=0));
+                keep1   = union(find(strcmp(groupN,'Perspective')),find(strcmp(groupN,'Affect')));
+                keep1   = union(keep1,    find(strcmp(groupN,'Presence')));
+                keep4   = find((~strcmp(group4,'Group3')));
+
+                keep6   = find(abs((hairChange_last(:,k)))~=0);
+                keep7   = find(abs((hairChange_last(:,k)))~=666);
+                keep    = mintersect(keep1,keep2,keep4, keep6, keep7);
+
+                size(keep)
+                size(mintersect(keep, find(strcmp(groupN,'Affect')))) % N = 184
+                size(intersect(keep,find(strcmp(sex,'female'))))
+                mean(age(keep))
+                std(age(keep))
+                min(age(keep))
+                max(age(keep))
+                size(find(strcmp(group4(keep),'Group_1')& (strcmp(groupN(keep),'Affect'))))
+                size(find(strcmp(group4(keep),'Group_2')& (strcmp(groupN(keep),'Affect'))))
+                %size(find(strcmp(group4(keep),'Group3')& (strcmp(groupN(keep),'Affect'))))
+
+                Ck      = mean(squeeze((FC_change(keep,kk,subfield_masks(:,kk)>0))),2);
+
+                ik      = id(keep,:);
+                ink     = idnum(keep);
+                tk      = tpnum(keep,:);
+                tnk     = tp(keep,:);
+                gk      = group(keep);
+                g4k     = group4(keep);
+                gNk     = groupN(keep);
+                ak      = age(keep);
+                sk      = sex(keep);
+                Compk   = hairChange_last(keep,k);
+                A       = term(ak);
+                S       = term(sk);
+                G       = term(gk);
+                G4      = term(g4k);
+                GN      = term(gNk);
+                Sub     = term(ik);
+                CMP     = term(Compk);
+                T       = term(tk);
+                Tn      = term(tnk);
+
+                M        = 1 + A + S + CMP  + random(Sub) + I;
+
+                slm     = SurfStatLinMod(Ck,M);
+                slm  	= SurfStatT(slm,(Compk));
+
+                p =  2*(1 - tcdf(abs(slm.t),slm.df));
+
+                stress_hipp(k,kk)   = slm.t;
+                stress_r(k,kk)  = sqrt(slm.t.^2 / (slm.t.^2 + slm.df)).*sign(slm.t);
+                stress_p(k,kk) = p;    
+
+            end
+
+
+        end
+      
+         stress_func = [stress_hipp(1,:);stress_p(1,:);stress_hipp(2,:);stress_p(2,:);...
+            stress_hipp(3,:);stress_p(3,:)];
+
+        csvwrite([figdir 'hair_func_all.csv'], stress_func)
+
+
+    end
