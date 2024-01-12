@@ -2593,3 +2593,187 @@ end
 
 
     end
+
+%% PLS analysis (Based on Kebets, 2019).
+
+% First generate the sample: 
+for figure3 = 1
+    for data_keep = 1
+        for k = 5
+            val = min(subfield_Change(:, [2,5])');
+            Xn =  min(squeeze(mean(FC_change(:,[2,5],:),2))');
+            Xn(isnan(Xn)) = 0;
+            keep3   = find(min(carChange_last(:,1:3)')~=-666);
+            
+            keep1   = union(find(strcmp(groupN,'Perspective')),find(strcmp(groupN,'Affect')));
+            keep1   = union(keep1,    find(strcmp(groupN,'Presence')));
+            %keep1   = union(keep1,    find(strcmp(groupN,'Control1')));
+            
+            %keep1   = find(strcmp(groupN,'Affect'));
+            keep2    = intersect(find(Xn' >-100), find(Xn'~=0));
+            keep4   = find(~(strcmp(group4,'Group3')));
+            keep5   = find(tpnum>0);
+            keep6   = find(abs(val)<666);
+            keep    = mintersect(keep1,keep2,keep3,keep4,keep5,keep6);
+            
+            size(keep)
+            size(mintersect(keep, find(strcmp(groupN,'Affect')))) % N = 184
+            size(intersect(keep,find(strcmp(sex,'female'))))
+            mean(age(keep))
+            std(age(keep))
+            min(age(keep))
+            max(age(keep))
+            size(find(strcmp(group4(keep),'Group_1')& (strcmp(groupN(keep),'Affect'))))
+            size(find(strcmp(group4(keep),'Group_2')& (strcmp(groupN(keep),'Affect'))))
+            
+            ik      = id(keep,:);
+            ink     = idnum(keep);
+            tk      = tpnum(keep,:);
+            tnk     = tp(keep,:);
+            gk      = group(keep);
+            g4k     = group4(keep);
+            gNk     = groupN(keep);
+            ak      = age(keep);
+            sk      = sex(keep);
+            
+            A       = term(ak);
+            S       = term(sk);
+            G       = term(gk);
+            G4      = term(g4k);
+            GN      = term(gNk);
+            Sub     = term(ik);
+            
+            T       = term(tk);
+            Tn      = term(tnk);
+            
+            fc_stuff = [mean(squeeze((FC_change(keep,1,subfield_masks(:,1)>0))),2),mean(squeeze((FC_change(keep,4,subfield_masks(:,4)>0))),2),...
+                mean(squeeze((FC_change(keep,2,subfield_masks(:,2)>0))),2),mean(squeeze((FC_change(keep,5,subfield_masks(:,5)>0))),2),...
+                mean(squeeze((FC_change(keep,3,subfield_masks(:,3)>0))),2),mean(squeeze((FC_change(keep,6,subfield_masks(:,6)>0))),2)]
+            
+            M1    = 1 +  A + S + random(Sub) + I;
+            slm   = SurfStatLinMod(fc_stuff,M1)
+            fc_stuffc  = fc_stuff - slm.X*slm.coef;
+            
+            slm   = SurfStatLinMod(subfield_Change(keep,:),M1)
+            subfield_Changec  = subfield_Change(keep,:) - slm.X*slm.coef;
+                   
+        end
+        
+    end
+end
+
+% then run PLS code based on the repository of the Yeo lab (CBIG-0.17.0-Fix_Absolute_Path)
+
+% Options
+nPerms_rest = 1000; % permutations in main (RSFC) PLS analysis
+nPerms_cv = 1000; % permutations in cross-validation
+nPerms_task = 1000; % permutations in task FC validation
+nBootstraps = 100; % bootstraps for RSFC & behavior loadings
+normalization_img = 2; % normalization options for RSFC data
+normalization_behav = 2; % normalization options for behavior adta
+
+
+%% PLS analysis
+
+disp('(3) Running PLS');
+
+% here for the CA1-3
+X0 = [subfield_Changec(:,[2,5]),fc_stuffc(:,[2,5])];
+Y0 = carChange_last(keep,:);
+  
+[U,S,V,Lx,Ly,explCovLC,LC_behav_loadings,LC_H_loadings] = ...
+    myPLS_analysis(X0,Y0,normalization_img,normalization_behav);
+
+%% Permutation testing
+
+disp('(4) Permutation testing over LCs');
+
+training_grouping(strcmp(gNk,'Presence')) = 1;
+training_grouping(strcmp(gNk,'Affect')) = 2;
+training_grouping(strcmp(gNk,'Perspective')) = 3;
+
+pvals_LC = myPLS_permut(X0,Y0,U,S,nPerms_rest,training_grouping,normalization_img,normalization_behav,1000);
+
+% FDR correction over the first 5 LCs
+[signif_LC, ~] = FDR(pvals_LC(1:3), 0.05);
+
+signif_LC = 1;
+% Display significant LCs
+disp('Significant LCs (after FDR correction):');
+for iter_lc = 1:length(signif_LC)
+    this_lc = signif_LC(iter_lc);
+    disp(['LC' num2str(this_lc) ' (p = ' num2str(pvals_LC(this_lc),'%0.3f') ') explains ' ...
+        num2str(round(100*explCovLC(this_lc))) '% of covariance']);
+end
+
+% Re-compute loadings using bootstrap 
+[LC_H_loadings_boot,LC_behav_loadings_boot,all_boot_orders] = CBIG_VK2019_bootstrap_loadings...
+    (X0,Y0,U,1,nBootstraps,training_grouping,normalization_img,normalization_behav,1000);
+
+beh_sq = squeeze(LC_behav_loadings_boot)'
+
+for i = 1:3
+    SEM = std(beh_sq(:,i))/sqrt(length(beh_sq(:,i)));               % Standard Error
+    ts = tinv([0.025  0.975],length(beh_sq(:,i))-1);      % T-Score
+    CI2 = ts*SEM;
+    CIb(i,:) = CI2(:,2);
+end
+
+behav_names = {'car', 'slope', 'auc'}
+figure;
+bar(LC_behav_loadings(:,1));
+xticks(1:3);
+xticklabels(behav_names);
+set(gca,'TickLabelInterpreter','none','FontSize',6,'Box','off');
+set(gcf,'Color','w');
+xtickangle(45);
+xlabel('Behavioral variables');
+ylabel('Correlation');
+title(['LC' num2str(this_lc) ' - Behavioral loadings']);
+name_fig = ['LC' num2str(this_lc) '_behav_loadings.jpg'];
+
+hold on
+% errorbar(x,y,ci,marker) where ci is the height of the line. This can be
+% computed from your confidence intervals.
+e = errorbar([1 2 3],LC_behav_loadings(:,1),CIb, 's', 'LineWidth', 2)
+e.Color = 'b'
+e.CapSize = 0;
+
+hip_sq = squeeze(LC_H_loadings)'
+
+for i = 1:4
+    SEM = std(hip_sq(:,i))/sqrt(length(hip_sq(:,i)));     % Standard Error
+    ts = tinv([0.025  0.975],length(hip_sq(:,i))-1);      % T-Score
+    CI2 = ts*SEM;
+    CI(i,:) = CI2(:,2);
+end
+
+% for all
+behav_names = {'LSub', 'LCA1-3', 'LCA4/DG','LSub', 'LCA1-3', 'LCA4/DG',...
+    'LSub', 'LCA1-3', 'LCA4/DG','LSub', 'LCA1-3', 'LCA4/DG'}
+
+% for CA13
+behav_names = {'LCA1-3', 'LCA1-3', 'LCA1-3', 'LCA1-3'}
+
+figure;
+bar(LC_H_loadings(:,1));
+xticks(1:12);
+xticklabels(behav_names);
+set(gca,'TickLabelInterpreter','none','FontSize',6,'Box','off');
+set(gcf,'Color','w');
+xtickangle(45);
+xlabel('Behavioral variables');
+ylabel('Correlation');
+title(['LC' num2str(this_lc) ' - Behavioral loadings']);
+name_fig = ['LC' num2str(this_lc) '_behav_loadings.jpg'];
+
+hold on
+% errorbar(x,y,ci,marker) where ci is the height of the line. This can be
+% computed from your confidence intervals.
+e = errorbar([1 2 3 4],LC_H_loadings(:,1),CI, 's', 'LineWidth', 2)
+e.Color = 'b'
+e.CapSize = 0;
+
+
+
+
